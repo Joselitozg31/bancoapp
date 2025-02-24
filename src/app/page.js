@@ -11,7 +11,7 @@ export default function Home() {
     if (user) {
       router.push("/dashboard"); // Si está autenticado, lo envía al dashboard
     } else {
-      router.push("/auth/login"); // Si no está autenticado, lo manda a login
+      router.push("/login"); // Si no está autenticado, lo manda a login
     }
   }, []);
 
