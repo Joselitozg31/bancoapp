@@ -12,7 +12,8 @@ export default function LoginPage() {
             alt="Logo del Banco"
             width={180}
             height={60}
-            className="h-14 w-auto transform hover:scale-105 transition-transform"
+            borderradius={10}
+            className="rounded-full overflow-hidden h-24 w-auto transform hover:scale-105 transition-transform"
           />
         </div>
 
