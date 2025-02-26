@@ -1,4 +1,3 @@
-// app/(auth)/registro/page.js
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -29,6 +28,15 @@ const documentTypes = [
   { value: 'NIE', label: 'NIE' },
 ];
 
+// Lista de prefijos telefónicos
+const phonePrefixes = [
+  { value: '+34', label: '+34' },
+  { value: '+52', label: '+52' },
+  { value: '+54', label: '+54' },
+  { value: '+57', label: '+57' },
+  { value: '+1', label: '+1' },
+];
+
 export default function Registro() {
   const [formData, setFormData] = useState({
     document_number: '',
@@ -36,6 +44,7 @@ export default function Registro() {
     last_name: '',
     birth_date: '',
     email: '',
+    phone_prefix: '',
     phone: '',
     country: '',
     nationality: '',
@@ -111,42 +120,26 @@ export default function Registro() {
           <p className="text-red-400 text-center mb-4 animate-bounce">{error}</p>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="document_number"
-            placeholder="Número de documento"
-            value={formData.document_number}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
-            required
-          />
-          <input
-            type="text"
-            name="first_name"
-            placeholder="Nombre"
-            value={formData.first_name}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
-            required
-          />
-          <input
-            type="text"
-            name="last_name"
-            placeholder="Apellido"
-            value={formData.last_name}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
-            required
-          />
-          <input
-            type="date"
-            name="birth_date"
-            placeholder="Fecha de nacimiento"
-            value={formData.birth_date}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
-            required
-          />
+          <div className="flex space-x-4">
+            <input
+              type="text"
+              name="first_name"
+              placeholder="Nombre"
+              value={formData.first_name}
+              onChange={handleChange}
+              className="w-1/2 px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+              required
+            />
+            <input
+              type="text"
+              name="last_name"
+              placeholder="Apellido"
+              value={formData.last_name}
+              onChange={handleChange}
+              className="w-1/2 px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+              required
+            />
+          </div>
           <input
             type="email"
             name="email"
@@ -156,39 +149,75 @@ export default function Registro() {
             className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
             required
           />
+          <div className="flex space-x-4">
+            <CustomSelect
+              options={phonePrefixes}
+              value={formData.phone_prefix}
+              onChange={(selectedOption) =>
+                handleSelectChange('phone_prefix', selectedOption)
+              }
+              placeholder="Prefijo"
+              className="w-1/4"
+            />
+            <input
+              type="text"
+              name="phone"
+              placeholder="Teléfono"
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-3/4 px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+              required
+            />
+          </div>
+          <div className="flex space-x-4">
+            <CustomSelect
+              options={documentTypes}
+              value={formData.document_type}
+              onChange={(selectedOption) =>
+                handleSelectChange('document_type', selectedOption)
+              }
+              placeholder="Selecciona un tipo de documento"
+              className="w-1/2"
+            />
+            <input
+              type="text"
+              name="document_number"
+              placeholder="Número de documento"
+              value={formData.document_number}
+              onChange={handleChange}
+              className="w-1/2 px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+              required
+            />
+          </div>
           <input
-            type="text"
-            name="phone"
-            placeholder="Teléfono"
-            value={formData.phone}
+            type="date"
+            name="birth_date"
+            placeholder="Fecha de nacimiento"
+            value={formData.birth_date}
             onChange={handleChange}
             className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
             required
           />
-          <CustomSelect
-            options={countries}
-            value={formData.country}
-            onChange={(selectedOption) =>
-              handleSelectChange('country', selectedOption)
-            }
-            placeholder="Selecciona un país"
-          />
-          <CustomSelect
-            options={nationalities}
-            value={formData.nationality}
-            onChange={(selectedOption) =>
-              handleSelectChange('nationality', selectedOption)
-            }
-            placeholder="Selecciona una nacionalidad"
-          />
-          <CustomSelect
-            options={documentTypes}
-            value={formData.document_type}
-            onChange={(selectedOption) =>
-              handleSelectChange('document_type', selectedOption)
-            }
-            placeholder="Selecciona un tipo de documento"
-          />
+          <div className="flex space-x-4">
+            <CustomSelect
+              options={countries}
+              value={formData.country}
+              onChange={(selectedOption) =>
+                handleSelectChange('country', selectedOption)
+              }
+              placeholder="Selecciona un país"
+              className="w-1/2"
+            />
+            <CustomSelect
+              options={nationalities}
+              value={formData.nationality}
+              onChange={(selectedOption) =>
+                handleSelectChange('nationality', selectedOption)
+              }
+              placeholder="Selecciona una nacionalidad"
+              className="w-1/2"
+            />
+          </div>
           <input
             type="text"
             name="address"
