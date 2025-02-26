@@ -40,9 +40,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-blue-700">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-950 to-blue-800">
       <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-6 text-center text-white">
+        <h1 className="text-4xl font-bold mb-6 text-center text-white">
           Iniciar sesión
         </h1>
         {error && (
