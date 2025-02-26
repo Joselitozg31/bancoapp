@@ -3,8 +3,7 @@ import React from 'react';
 const TerminosYCondiciones = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-950 to-blue-800 text-white p-6">
-      <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-xxl h-[50rem] overflow-y-auto scrollbar-thin scrollbar-thumb-white/50 scrollbar-track-white/20 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
-        <h1 className="text-3xl font-bold mb-6">Términos y Condiciones del Banco Innova</h1>
+      <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-xxl h-[50rem] overflow-y-auto scrollbar-thin scrollbar-thumb-rounded-full scrollbar-track-rounded-full">        <h1 className="text-3xl font-bold mb-6">Términos y Condiciones del Banco Innova</h1>
         <h2 className="text-2xl font-semibold mt-4 mb-2">1. Introducción</h2>
         <p className="mb-4">Bienvenido a Innova. Estos Términos y Condiciones rigen el uso de nuestros servicios bancarios y financieros. Al acceder y utilizar nuestros servicios, usted acepta estos términos en su totalidad.</p>
         <h2 className="text-2xl font-semibold mt-4 mb-2">2. Servicios</h2>
