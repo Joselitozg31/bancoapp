@@ -1,11 +1,13 @@
-// app/(auth)/login/page.js
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import CustomSelect from '@/components/CustomSelect'; // Importa el componente CustomSelect
 
 export default function Login() {
   const [document_number, setDocumentNumber] = useState('');
+  const [document_type, setDocumentType] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberUser, setRememberUser] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -14,7 +16,7 @@ export default function Login() {
     setError('');
 
     // Validar que los campos no estén vacíos
-    if (!document_number || !password) {
+    if (!document_number || !password || !document_type) {
       setError('Todos los campos son obligatorios');
       return;
     }
@@ -23,7 +25,7 @@ export default function Login() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ document_number, password }),
+        body: JSON.stringify({ document_number, document_type, password }),
       });
 
       if (!response.ok) {
@@ -32,7 +34,9 @@ export default function Login() {
       }
 
       const userData = await response.json();
-      localStorage.setItem('user', JSON.stringify(userData)); // Guardar datos del usuario en localStorage
+      if (rememberUser) {
+        localStorage.setItem('user', JSON.stringify(userData)); // Guardar datos del usuario en localStorage
+      }
       router.push('/dashboard'); // Redirigir al dashboard después del login
     } catch (err) {
       setError(err.message);
@@ -40,43 +44,59 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-950 to-blue-800">
-      <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        <h1 className="text-4xl font-bold mb-6 text-center text-white">
-          Iniciar sesión
-        </h1>
+    <div className="min-h-full flex items-center justify-center">
+      <div className="container">
+        <h1>Te damos la bienvenida a tu banca online</h1>
         {error && (
-          <p className="text-red-400 text-center mb-4 animate-bounce">{error}</p>
+          <p className="error">{error}</p>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Número de documento"
-            value={document_number}
-            onChange={(e) => setDocumentNumber(e.target.value)}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
-            required
-          />
+        <form onSubmit={handleSubmit}>
+          <div className="flex space-x-4">
+            <input
+              type="text"
+              placeholder="Número de documento"
+              value={document_number}
+              onChange={(e) => setDocumentNumber(e.target.value)}
+              required
+            />
+            <CustomSelect
+              options={[
+                { value: 'DNI', label: 'DNI' },
+                { value: 'Pasaporte', label: 'Pasaporte' },
+                { value: 'NIE', label: 'NIE' },
+              ]}
+              value={document_type}
+              onChange={(selectedOption) => setDocumentType(selectedOption.value)}
+              placeholder="Tipo de documento"
+              required
+            />
+          </div>
           <input
             type="password"
             placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
             required
           />
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-105"
-          >
-            Iniciar sesión
-          </button>
+          <div className="flex justify-center items-center space-x-2 mt-4">
+            <input
+              type="checkbox"
+              checked={rememberUser}
+              onChange={(e) => setRememberUser(e.target.checked)}
+            />
+            <label>Recordar usuario</label>
+          </div>
+          <div className="flex justify-center space-x-4 mt-4">
+            <button type="submit" className="bg-blue-700 text-white p-2 rounded-lg">
+              Acceder
+            </button>
+            <button type="button" className="bg-blue-500 text-white p-2 rounded-lg" onClick={() => router.push('/register')}>
+              Hazte cliente
+            </button>
+          </div>
         </form>
-        <p className="mt-4 text-center text-white/70">
-          ¿No tienes una cuenta?{' '}
-          <a href="/register" className="text-blue-400 hover:underline">
-            Regístrate
-          </a>
+        <p className="mt-4 text-center">
+          <a href="/recover">Recuperar contraseña</a>
         </p>
       </div>
     </div>

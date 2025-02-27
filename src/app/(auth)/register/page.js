@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CustomSelect from '@/components/CustomSelect';
+import TermsModal from '@/components/TermsModal'; // Importa el componente del modal
 
 // Lista de países
 const countries = [
@@ -30,11 +31,11 @@ const documentTypes = [
 
 // Lista de prefijos telefónicos
 const phonePrefixes = [
-  { value: '+34', label: '+34' },
-  { value: '+52', label: '+52' },
-  { value: '+54', label: '+54' },
-  { value: '+57', label: '+57' },
-  { value: '+1', label: '+1' },
+  { value: '+34', label: '+34 (España)' },
+  { value: '+52', label: '+52 (México)' },
+  { value: '+54', label: '+54 (Argentina)' },
+  { value: '+57', label: '+57 (Colombia)' },
+  { value: '+1', label: '+1 (Estados Unidos)' },
 ];
 
 export default function Registro() {
@@ -52,13 +53,22 @@ export default function Registro() {
     address: '',
     password: '',
     confirm_password: '',
+    document_image: null, // Añadir este campo
+    terms: false, // Añadir este campo
   });
   const [error, setError] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar el modal
   const router = useRouter();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, files } = e.target;
+    if (name === 'document_image') {
+      setFormData({ ...formData, [name]: files[0] });
+    } else if (name === 'terms') {
+      setFormData({ ...formData, [name]: e.target.checked });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSelectChange = (name, selectedOption) => {
@@ -71,7 +81,7 @@ export default function Registro() {
 
     // Validar que todos los campos estén llenos
     for (const key in formData) {
-      if (!formData[key]) {
+      if (!formData[key] && key !== 'document_image' && key !== 'terms') {
         setError('Todos los campos son obligatorios');
         return;
       }
@@ -92,34 +102,46 @@ export default function Registro() {
       return;
     }
 
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    // Convertir la imagen a base64
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Image = reader.result;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message);
+      // Guardar la imagen del documento y la aceptación de los términos en localStorage
+      localStorage.setItem('document_image', base64Image);
+      localStorage.setItem('terms_accepted', formData.terms.toString());
+
+      // Enviar los datos al servidor
+      const { document_image, terms, ...dataToSend } = formData;
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dataToSend),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message);
+        }
+
+        router.push('/login');
+      } catch (err) {
+        setError(err.message);
       }
+    };
 
-      router.push('/login');
-    } catch (err) {
-      setError(err.message);
-    }
+    reader.readAsDataURL(formData.document_image);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-950 to-blue-800">
-      <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-6 text-center text-white">
-          Registro
-        </h1>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="container">
+        <h1>¡Ten tu cuenta en unos minutos!</h1>
         {error && (
-          <p className="text-red-400 text-center mb-4 animate-bounce">{error}</p>
+          <p className="error">{error}</p>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
           <div className="flex space-x-4">
             <input
               type="text"
@@ -127,7 +149,7 @@ export default function Registro() {
               placeholder="Nombre"
               value={formData.first_name}
               onChange={handleChange}
-              className="w-1/2 px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+              className="w-1/2"
               required
             />
             <input
@@ -136,7 +158,7 @@ export default function Registro() {
               placeholder="Apellido"
               value={formData.last_name}
               onChange={handleChange}
-              className="w-1/2 px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+              className="w-1/2"
               required
             />
           </div>
@@ -146,7 +168,7 @@ export default function Registro() {
             placeholder="Correo electrónico"
             value={formData.email}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+            className="w-full"
             required
           />
           <div className="flex space-x-4">
@@ -165,7 +187,7 @@ export default function Registro() {
               placeholder="Teléfono"
               value={formData.phone}
               onChange={handleChange}
-              className="w-3/4 px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+              className="w-3/4"
               required
             />
           </div>
@@ -185,17 +207,26 @@ export default function Registro() {
               placeholder="Número de documento"
               value={formData.document_number}
               onChange={handleChange}
-              className="w-1/2 px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+              className="w-1/2"
               required
             />
           </div>
+          <input
+            type="file"
+            name="document_image"
+            accept="image/*" // Restringir a solo formatos de imagen
+            placeholder="Adjuntar imagen del documento"
+            onChange={handleChange}
+            className="w-full"
+            required
+          />
           <input
             type="date"
             name="birth_date"
             placeholder="Fecha de nacimiento"
             value={formData.birth_date}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+            className="w-full"
             required
           />
           <div className="flex space-x-4">
@@ -224,7 +255,7 @@ export default function Registro() {
             placeholder="Dirección"
             value={formData.address}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+            className="w-full"
             required
           />
           <input
@@ -233,7 +264,7 @@ export default function Registro() {
             placeholder="Contraseña"
             value={formData.password}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+            className="w-full"
             required
           />
           <input
@@ -242,23 +273,28 @@ export default function Registro() {
             placeholder="Confirmar contraseña"
             value={formData.confirm_password}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 hover:bg-white/30 focus:bg-white/30"
+            className="w-full"
             required
           />
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-105"
-          >
-            Registrarse
-          </button>
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="terms"
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="terms">
+              Acepto los <a href="#" onClick={() => setIsModalOpen(true)}>términos y condiciones</a>
+            </label>
+          </div>
+          <button type="submit">Hazte cliente</button>
         </form>
-        <p className="mt-4 text-center text-white/70">
+        <p className="mt-4">
           ¿Ya tienes una cuenta?{' '}
-          <a href="/login" className="text-blue-400 hover:underline">
-            Inicia sesión
-          </a>
+          <a href="/login">Inicia sesión</a>
         </p>
       </div>
+      {isModalOpen && <TermsModal onClose={() => setIsModalOpen(false)} />} {/* Mostrar el modal */}
     </div>
   );
 }
