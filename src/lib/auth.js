@@ -65,7 +65,6 @@ export async function loginUser(document_number, password) {
   const { password: _, ...userData } = user;
   return userData;
 }
-// filepath: /c:/Users/fjrod/OneDrive/Escritorio/2º DAW/VSCode/Entorno Cliente/bancoapp/src/lib/auth.js
 
 const secret = process.env.JWT_SECRET;
 
@@ -75,4 +74,12 @@ export function verifyToken(token) {
   } catch (error) {
     throw new Error('Token inválido');
   }
+}
+
+export async function verifyUser(email) {
+  const [result] = await pool.execute('UPDATE users SET verified = ? WHERE email = ?', [true, email]);
+  if (result.affectedRows === 0) {
+    throw new Error('Usuario no encontrado');
+  }
+  return result;
 }
