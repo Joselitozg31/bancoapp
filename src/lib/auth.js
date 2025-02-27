@@ -1,5 +1,6 @@
 import pool from './database';
 import bcrypt from 'bcryptjs'; // Para encriptar contraseñas
+import jwt from 'jsonwebtoken';
 
 // Función para registrar un nuevo usuario
 export async function registerUser(userData) {
@@ -63,4 +64,15 @@ export async function loginUser(document_number, password) {
   // Devolver los datos del usuario (sin la contraseña)
   const { password: _, ...userData } = user;
   return userData;
+}
+// filepath: /c:/Users/fjrod/OneDrive/Escritorio/2º DAW/VSCode/Entorno Cliente/bancoapp/src/lib/auth.js
+
+const secret = process.env.JWT_SECRET;
+
+export function verifyToken(token) {
+  try {
+    return jwt.verify(token, secret);
+  } catch (error) {
+    throw new Error('Token inválido');
+  }
 }
