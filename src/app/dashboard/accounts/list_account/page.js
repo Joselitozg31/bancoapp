@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 
+// Función principal para la página de cuentas
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Efecto para cargar las cuentas al montar el componente
   useEffect(() => {
     fetch('/api/accounts')
       .then(response => response.json())
@@ -17,8 +19,10 @@ export default function AccountsPage() {
       });
   }, []);
 
+  // Mostrar mensaje de carga mientras se obtienen los datos
   if (loading) return <div>Cargando...</div>;
 
+  // Renderizar la tabla de cuentas
   return (
     <div>
       <h1>Cuentas Bancarias</h1>
