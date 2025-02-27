@@ -1,7 +1,6 @@
-//Modelo accounts.js
 import pool from './database';
-// Funcion de para contratar una cuenta
-// Toma como parametros los datos del formulario de contratacion de cuenta
+
+// Función para contratar una cuenta
 export async function contractAccount(accountData) {
   const {
     iban,
@@ -12,7 +11,7 @@ export async function contractAccount(accountData) {
     held_balance,
     opening_date,
   } = accountData;
-  // Consulta parametrizada para insertar los datos de la cuenta en la base de datos
+
   const [result] = await pool.query(
     `INSERT INTO accounts (
       iban, account_type, total_balance, available_balance, held_balance, opening_date
@@ -29,9 +28,9 @@ export async function contractAccount(accountData) {
   );
   return result.insertId;
 }
-// Funcion para listar las cuentas de un usuario
+
+// Función para listar las cuentas de un usuario
 export async function listAccount(document_number) {
-  // Consulta parametrizada para obtener las cuentas de un usuario
   const [rows] = await pool.query('SELECT * FROM accounts WHERE document_number = ?', [document_number]);
 
   if (rows.length === 0) {
@@ -39,4 +38,15 @@ export async function listAccount(document_number) {
   }
 
   return rows;
+}
+
+// Función para eliminar una cuenta
+export async function deleteAccount(iban) {
+  const [result] = await pool.query('DELETE FROM accounts WHERE iban = ?', [iban]);
+
+  if (result.affectedRows === 0) {
+    throw new Error('Cuenta no encontrada');
+  }
+
+  return result.affectedRows;
 }
