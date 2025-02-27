@@ -135,13 +135,13 @@ export default function Registro() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="container">
-        <h1>¡Ten tu cuenta en unos minutos!</h1>
+    <div className="min-h-full flex items-center justify-center">
+      <div className="container max-w-3xl p-8"> {/* Cambiado a max-w-3xl */}
+      <h1 className="text-3xl font-bold mb-6 text-white">¡Ten tu cuenta en unos minutos!</h1>
         {error && (
           <p className="error">{error}</p>
         )}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex space-x-4">
             <input
               type="text"
@@ -211,22 +211,29 @@ export default function Registro() {
               required
             />
           </div>
-          <input
-            type="file"
-            name="document_image"
-            accept="image/*" // Restringir a solo formatos de imagen
-            placeholder="Adjuntar imagen del documento"
-            onChange={handleChange}
-            className="w-full"
-            required
-          />
+          <div className="relative w-full">
+            <input
+              type="file"
+              name="document_image"
+              accept="image/*" // Restringir a solo formatos de imagen
+              onChange={handleChange}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              required
+            />
+            <div className="bg-blue-500 text-white p-3 rounded-lg border-none transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:bg-blue-600 flex items-center justify-center cursor-pointer">
+              <span>Adjuntar imagen del documento</span>
+              <svg className="w-6 h-6 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M16 12l-4-4m0 0l-4 4m4-4v12"></path>
+              </svg>
+            </div>
+          </div>
           <input
             type="date"
             name="birth_date"
             placeholder="Fecha de nacimiento"
             value={formData.birth_date}
             onChange={handleChange}
-            className="w-full"
+            className="w-full bg-white/20 text-white p-3 rounded-lg border-none transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:bg-white/30" // Añadido estilos
             required
           />
           <div className="flex space-x-4">
@@ -276,22 +283,24 @@ export default function Registro() {
             className="w-full"
             required
           />
-          <div className="flex items-center space-x-2">
+          <div className="flex justify-center items-center space-x-2 mt-4">
             <input
               type="checkbox"
               name="terms"
               onChange={handleChange}
               required
             />
-            <label htmlFor="terms">
-              Acepto los <a href="#" onClick={() => setIsModalOpen(true)}>términos y condiciones</a>
+            <label htmlFor="terms" className="text-white">
+              Acepto los <a href="#" onClick={() => setIsModalOpen(true)} className="text-blue-400 hover:underline">términos y condiciones</a>
             </label>
           </div>
-          <button type="submit">Hazte cliente</button>
+          <button type="submit" className="bg-blue-500 text-white p-3 rounded-lg border-none transition-all duration-300 cursor-pointer hover:bg-blue-600 transform hover:scale-105">
+            Hazte cliente
+          </button>
         </form>
-        <p className="mt-4">
+        <p className="mt-4 text-center text-white">
           ¿Ya tienes una cuenta?{' '}
-          <a href="/login">Inicia sesión</a>
+          <a href="/login" className="text-blue-400 hover:underline">Inicia sesión</a>
         </p>
       </div>
       {isModalOpen && <TermsModal onClose={() => setIsModalOpen(false)} />} {/* Mostrar el modal */}

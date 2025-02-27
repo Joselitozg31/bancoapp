@@ -60,24 +60,25 @@ CREATE TABLE transfers (
     FOREIGN KEY (destination_account_iban) REFERENCES accounts(iban)
 );
 
--- Tabla de seguros
+-- Tabla de seguros sin las fechas de contratación y expiración
 CREATE TABLE insurances (
     insurance_id INT AUTO_INCREMENT PRIMARY KEY,
-    insurance_type VARCHAR(50) NOT NULL,
-    hiring_date DATE NOT NULL,
-    expiration_date DATE NOT NULL
+    insurance_type VARCHAR(50) NOT NULL
 );
 
--- Tabla intermedia para relacionar usuarios, cuentas y seguros
+-- Tabla intermedia para relacionar usuarios, cuentas y seguros con fechas
 CREATE TABLE user_account_insurances (
     user_document_number VARCHAR(50) NOT NULL,
     account_iban VARCHAR(34) NOT NULL,
     insurance_id INT NOT NULL,
+    hiring_date DATE NOT NULL,
+    expiration_date DATE NOT NULL,
     PRIMARY KEY (user_document_number, account_iban, insurance_id),
     FOREIGN KEY (user_document_number) REFERENCES users(document_number),
     FOREIGN KEY (account_iban) REFERENCES accounts(iban),
     FOREIGN KEY (insurance_id) REFERENCES insurances(insurance_id)
 );
+
 -- Tabla de transacciones
 CREATE TABLE transactions (
     transaction_id INT AUTO_INCREMENT PRIMARY KEY,

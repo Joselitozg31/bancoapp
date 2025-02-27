@@ -15,11 +15,11 @@
 }
 
 body {
-  @apply min-h-screen bg-gradient-to-br from-blue-900 to-slate-900 text-[var(--foreground)] bg-[var(--background)] font-emoji flex flex-col justify-center;
+  @apply min-h-screen bg-gradient-to-br from-blue-900 to-slate-900 text-[var(--foreground)] bg-[var(--background)] font-emoji flex flex-col justify-between;
 }
 
 .container {
-  @apply bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl max-w-md w-full text-center mt-20; /* Cambiado de mt-8 a mt-20 */
+  @apply bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl max-w-3xl w-full text-center mt-20 mb-16 flex-grow; /* Añadido flex-grow */
 }
 
 h1 {
@@ -34,7 +34,7 @@ form {
   @apply flex flex-col space-y-4;
 }
 
-input, select {
+input, select, textarea {
   @apply p-3 rounded-lg border-none bg-white/20 text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:bg-white/30;
 }
 
