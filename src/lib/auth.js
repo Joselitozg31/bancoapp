@@ -1,6 +1,6 @@
 import pool from './database';
 import bcrypt from 'bcryptjs'; // Para encriptar contraseñas
-import jwt from 'jsonwebtoken';
+//import jwt from 'jsonwebtoken';
 
 // Función para registrar un nuevo usuario
 export async function registerUser(userData) {
@@ -66,6 +66,8 @@ export async function loginUser(document_number, password) {
   return userData;
 }
 
+// filepath: /c:/Users/fjrod/OneDrive/Escritorio/2º DAW/VSCode/Entorno Cliente/bancoapp/src/lib/auth.js
+/*
 const secret = process.env.JWT_SECRET;
 
 export function verifyToken(token) {
@@ -75,11 +77,4 @@ export function verifyToken(token) {
     throw new Error('Token inválido');
   }
 }
-
-export async function verifyUser(email) {
-  const [result] = await pool.execute('UPDATE users SET verified = ? WHERE email = ?', [true, email]);
-  if (result.affectedRows === 0) {
-    throw new Error('Usuario no encontrado');
-  }
-  return result;
-}
+  */
