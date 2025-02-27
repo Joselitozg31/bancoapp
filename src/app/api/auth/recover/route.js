@@ -24,8 +24,8 @@ export const POST = async (req, res) => {
       Messages: [
         {
           From: {
-            Email: 'lromnav497@gmail.com',
-            Name: 'Innova',
+            Email: process.env.MAILJET_FROM_EMAIL,
+            Name: process.env.MAILJET_FROM_NAME,
           },
           To: [
             {
