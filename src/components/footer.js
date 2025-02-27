@@ -4,16 +4,16 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 
 const Footer = () => {
-  const [showCookieModal, setShowCookieModal] = useState(false);
+  const [showCookieModal, setShowCookieModal] = useState(false); // Estado para mostrar u ocultar el modal de cookies
 
   const handleAcceptAllCookies = () => {
     // Lógica para aceptar todas las cookies
-    setShowCookieModal(false);
+    setShowCookieModal(false); // Ocultar el modal de cookies
   };
 
   const handleAcceptEssentialCookies = () => {
     // Lógica para aceptar solo las cookies esenciales
-    setShowCookieModal(false);
+    setShowCookieModal(false); // Ocultar el modal de cookies
   };
 
   return (

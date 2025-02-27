@@ -60,21 +60,24 @@ export default function Registro() {
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar el modal
   const router = useRouter();
 
+  // Manejar cambios en los campos del formulario
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === 'document_image') {
-      setFormData({ ...formData, [name]: files[0] });
+      setFormData({ ...formData, [name]: files[0] }); // Guardar el archivo de imagen
     } else if (name === 'terms') {
-      setFormData({ ...formData, [name]: e.target.checked });
+      setFormData({ ...formData, [name]: e.target.checked }); // Guardar el estado del checkbox
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData({ ...formData, [name]: value }); // Guardar el valor del campo
     }
   };
 
+  // Manejar cambios en los campos de selección
   const handleSelectChange = (name, selectedOption) => {
     setFormData({ ...formData, [name]: selectedOption.value });
   };
 
+  // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -261,7 +264,7 @@ export default function Registro() {
             name="address"
             placeholder="Dirección"
             value={formData.address}
-            onChange={handleChange}
+            onChange={handleChange} // Actualizar el estado de la dirección
             className="w-full"
             required
           />
@@ -270,7 +273,7 @@ export default function Registro() {
             name="password"
             placeholder="Contraseña"
             value={formData.password}
-            onChange={handleChange}
+            onChange={handleChange} // Actualizar el estado de la contraseña
             className="w-full"
             required
           />
@@ -279,7 +282,7 @@ export default function Registro() {
             name="confirm_password"
             placeholder="Confirmar contraseña"
             value={formData.confirm_password}
-            onChange={handleChange}
+            onChange={handleChange} // Actualizar el estado de confirmar la contraseña
             className="w-full"
             required
           />
@@ -287,7 +290,7 @@ export default function Registro() {
             <input
               type="checkbox"
               name="terms"
-              onChange={handleChange}
+              onChange={handleChange} // Actualizar el estado de aceptación de términos
               required
             />
             <label htmlFor="terms" className="text-white">

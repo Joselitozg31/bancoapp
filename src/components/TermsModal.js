@@ -1,22 +1,28 @@
 import { useEffect } from 'react';
 
+// Componente TermsModal que recibe la propiedad onClose para cerrar el modal
 export default function TermsModal({ onClose }) {
+  // useEffect para manejar el evento de cierre del modal al presionar la tecla Escape
   useEffect(() => {
     const handleEscape = (event) => {
       if (event.key === 'Escape') {
-        onClose();
+        onClose(); // Llamar a la función onClose cuando se presiona Escape
       }
     };
-    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('keydown', handleEscape); // Añadir el evento keydown al documento
     return () => {
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleEscape); // Limpiar el evento keydown al desmontar el componente
     };
-  }, [onClose]);
+  }, [onClose]); // Dependencia de onClose para actualizar el efecto cuando cambie
 
+  // Renderizar el modal
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      {/* Contenedor del modal con estilos para el fondo y la posición */}
       <div className="container max-h-[80vh] overflow-y-auto">
+        {/* Título del modal */}
         <h2 className="text-2xl font-bold mb-4">Términos y Condiciones del Banco Innova</h2>
+        {/* Contenido del modal con términos y condiciones */}
         <div className="overflow-y-auto max-h-96">
           <h2 className="text-2xl font-semibold mt-4 mb-2">1. Introducción</h2>
           <p className="mb-4">Bienvenido a Innova. Estos Términos y Condiciones rigen el uso de nuestros servicios bancarios y financieros. Al acceder y utilizar nuestros servicios, usted acepta estos términos en su totalidad.</p>
@@ -39,9 +45,10 @@ export default function TermsModal({ onClose }) {
           <h2 className="text-2xl font-semibold mt-4 mb-2">10. Ley Aplicable</h2>
           <p className="mb-4">Estos Términos y Condiciones se rigen por las leyes de España. Cualquier disputa se resolverá en los tribunales competentes del país.</p>
         </div>
+        {/* Botón para cerrar el modal */}
         <button
           className="mt-4 p-2 bg-blue-500 text-white rounded-lg"
-          onClick={onClose}
+          onClick={onClose} // Llamar a la función onClose al hacer clic en el botón
         >
           Cerrar
         </button>

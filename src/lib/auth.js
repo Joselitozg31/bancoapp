@@ -37,11 +37,11 @@ export async function registerUser(userData) {
       nationality,
       document_type,
       address,
-      hashedPassword,
+      hashedPassword, // Usar la contraseña encriptada
     ]
   );
 
-  return result.insertId;
+  return result.insertId; // Devolver el ID del nuevo usuario
 }
 
 // Función para autenticar un usuario (login)
@@ -50,7 +50,7 @@ export async function loginUser(document_number, password) {
   const [rows] = await pool.query('SELECT * FROM users WHERE document_number = ?', [document_number]);
 
   if (rows.length === 0) {
-    throw new Error('Usuario no encontrado');
+    throw new Error('Usuario no encontrado'); // Lanzar un error si el usuario no existe
   }
 
   const user = rows[0];
@@ -58,15 +58,15 @@ export async function loginUser(document_number, password) {
   // Verificar la contraseña
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (!passwordMatch) {
-    throw new Error('Contraseña incorrecta');
+    throw new Error('Contraseña incorrecta'); // Lanzar un error si la contraseña es incorrecta
   }
 
   // Devolver los datos del usuario (sin la contraseña)
   const { password: _, ...userData } = user;
-  return userData;
+  return userData; // Devolver los datos del usuario sin la contraseña
 }
 
-// filepath: /c:/Users/fjrod/OneDrive/Escritorio/2º DAW/VSCode/Entorno Cliente/bancoapp/src/lib/auth.js
+// Código comentado para la verificación de tokens JWT
 /*
 const secret = process.env.JWT_SECRET;
 
@@ -77,4 +77,4 @@ export function verifyToken(token) {
     throw new Error('Token inválido');
   }
 }
-  */
+*/

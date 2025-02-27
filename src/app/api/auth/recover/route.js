@@ -10,16 +10,16 @@ const mailjetClient = new Mailjet({
 });
 
 export const POST = async (req, res) => {
-  const { email } = await req.json();
+  const { email } = await req.json(); // Extraer el correo electrónico del cuerpo de la solicitud
 
   if (!email) {
-    return new Response(JSON.stringify({ message: 'Email is required' }), { status: 400 });
+    return new Response(JSON.stringify({ message: 'Email is required' }), { status: 400 }); // Validar que el correo electrónico esté presente
   }
 
-  const recoveryCode = uuidv4().slice(0, 8); // Generate a random 8-character code
+  const recoveryCode = uuidv4().slice(0, 8); // Generar un código aleatorio de 8 caracteres
 
   try {
-    // Send email with Mailjet
+    // Enviar correo electrónico con Mailjet
     await mailjetClient.post('send', { version: 'v3.1' }).request({
       Messages: [
         {
@@ -40,11 +40,11 @@ export const POST = async (req, res) => {
       ],
     });
 
-    // Save the recovery code and email in your database (this is a placeholder)
+    // Guardar el código de recuperación y el correo en tu base de datos (esto es un marcador de posición)
     // await saveRecoveryCodeToDatabase(email, recoveryCode);
 
-    return new Response(JSON.stringify({ message: 'Recovery code sent', recoveryCode }), { status: 200 });
+    return new Response(JSON.stringify({ message: 'Recovery code sent', recoveryCode }), { status: 200 }); // Devolver una respuesta exitosa
   } catch (error) {
-    return new Response(JSON.stringify({ message: 'Error sending email', error: error.message }), { status: 500 });
+    return new Response(JSON.stringify({ message: 'Error sending email', error: error.message }), { status: 500 }); // Devolver un mensaje de error si ocurre una excepción
   }
 };
