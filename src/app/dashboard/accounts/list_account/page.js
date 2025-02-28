@@ -1,3 +1,4 @@
+// Importar módulos necesarios
 import { useState, useEffect } from 'react';
 
 // Función principal para la página de cuentas
@@ -7,7 +8,7 @@ export default function AccountsPage() {
 
   // Efecto para cargar las cuentas al montar el componente
   useEffect(() => {
-    fetch('/api/accounts')
+    fetch('/api/dashboard/list_accounts')
       .then(response => response.json())
       .then(data => {
         setAccounts(data);
@@ -29,19 +30,25 @@ export default function AccountsPage() {
       <table>
         <thead>
           <tr>
-            <th>Número</th>
-            <th>Titular</th>
-            <th>Balance</th>
+            <th>IBAN</th>
+            <th>Tipo de Cuenta</th>
             <th>Moneda</th>
+            <th>Balance Total</th>
+            <th>Balance Disponible</th>
+            <th>Balance Retenido</th>
+            <th>Fecha de Apertura</th>
           </tr>
         </thead>
         <tbody>
           {accounts.map(account => (
-            <tr key={account.id}>
+            <tr key={account.iban}>
               <td>{account.iban}</td>
               <td>{account.account_type}</td>
-              <td>${account.total_balance.toFixed(2)}</td>
               <td>{account.currency}</td>
+              <td>{account.total_balance}</td>
+              <td>{account.available_balance}</td>
+              <td>{account.held_balance}</td>
+              <td>{account.opening_date}</td>
             </tr>
           ))}
         </tbody>

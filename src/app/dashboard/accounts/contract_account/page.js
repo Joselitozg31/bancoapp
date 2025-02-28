@@ -1,8 +1,9 @@
+// Importar módulos necesarios
 import { useState } from 'react';
 
 // Componente principal para la página de contratación de cuentas
 export default function ContractAccountPage() {
-  // Estado para la nueva cuenta
+  // Estado para los datos de la nueva cuenta
   const [newAccount, setNewAccount] = useState({
     iban: '',
     account_type: '',
@@ -10,36 +11,39 @@ export default function ContractAccountPage() {
     total_balance: '',
     available_balance: '',
     held_balance: '',
-    opening_date: ''
+    opening_date: '',
   });
 
   // Estado para las cuentas existentes
   const [accounts, setAccounts] = useState([]);
-  // Estado para el indicador de carga
   const [loading, setLoading] = useState(false);
-  // Estado para el mensaje de error
   const [error, setError] = useState('');
 
-  // Manejar el envío del formulario
+  // Función para manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const response = await fetch('/api/accounts', {
+      // Enviar solicitud para contratar una nueva cuenta
+      const response = await fetch('/api/dashboard/contract_account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAccount)
+        body: JSON.stringify(newAccount),
       });
 
+      // Manejar errores en la respuesta
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message);
       }
 
+      // Obtener la cuenta creada de la respuesta
       const createdAccount = await response.json();
       setAccounts([...accounts, createdAccount]);
+
+      // Restablecer el formulario
       setNewAccount({
         iban: '',
         account_type: '',
@@ -47,7 +51,7 @@ export default function ContractAccountPage() {
         total_balance: '',
         available_balance: '',
         held_balance: '',
-        opening_date: ''
+        opening_date: '',
       });
     } catch (err) {
       setError(err.message);
@@ -55,20 +59,25 @@ export default function ContractAccountPage() {
       setLoading(false);
     }
   };
+
+  // Función para manejar la eliminación de una cuenta
   const handleDelete = async (iban) => {
     setLoading(true);
     setError('');
 
     try {
-      const response = await fetch(`/api/accounts/${iban}`, {
-        method: 'DELETE'
+      // Enviar solicitud para eliminar una cuenta
+      const response = await fetch(`/api/dashboard/delete_account?iban=${iban}`, {
+        method: 'DELETE',
       });
 
+      // Manejar errores en la respuesta
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message);
       }
 
+      // Actualizar el estado para eliminar la cuenta de la lista
       setAccounts(accounts.filter(account => account.iban !== iban));
     } catch (err) {
       setError(err.message);

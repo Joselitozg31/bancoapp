@@ -10,12 +10,13 @@ export async function contractAccount(accountData) {
     available_balance,
     held_balance,
     opening_date,
+    user_document_number,
   } = accountData;
 
   const [result] = await pool.query(
     `INSERT INTO accounts (
-      iban, account_type, total_balance, available_balance, held_balance, opening_date
-    ) VALUES (?, ?, ?, ?, ?, ?)`,
+      iban, account_type, currency, total_balance, available_balance, held_balance, opening_date, user_document_number
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       iban,
       account_type,
@@ -24,14 +25,16 @@ export async function contractAccount(accountData) {
       available_balance,
       held_balance,
       opening_date,
+      user_document_number,
     ]
   );
+
   return result.insertId;
 }
 
 // Función para listar las cuentas de un usuario
-export async function listAccount(document_number) {
-  const [rows] = await pool.query('SELECT * FROM accounts WHERE document_number = ?', [document_number]);
+export async function listAccounts(user_document_number) {
+  const [rows] = await pool.query('SELECT * FROM accounts WHERE user_document_number = ?', [user_document_number]);
 
   if (rows.length === 0) {
     throw new Error('Cuentas no encontradas');
