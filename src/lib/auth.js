@@ -51,6 +51,7 @@ export async function loginUser(document_number, password) {
   // Buscar el usuario en la base de datos por su número de documento
   const [rows] = await pool.query('SELECT * FROM users WHERE document_number = ?', [document_number]);
 
+  // Verificar si el usuario existe
   if (rows.length === 0) {
     throw new Error('Usuario no encontrado');
   }
