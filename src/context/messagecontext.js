@@ -5,14 +5,20 @@ import React, { createContext, useState, useEffect } from 'react';
 export const MessageContext = createContext();
 
 export const MessageProvider = ({ children }) => {
-  const [messages, setMessages] = useState(() => {
+  const [messages, setMessages] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
     const savedMessages = localStorage.getItem('messages');
-    return savedMessages ? JSON.parse(savedMessages) : [];
-  });
-  const [favorites, setFavorites] = useState(() => {
+    if (savedMessages) {
+      setMessages(JSON.parse(savedMessages));
+    }
+
     const savedFavorites = localStorage.getItem('favorites');
-    return savedFavorites ? JSON.parse(savedFavorites) : [];
-  });
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
+  }, []);
 
   // Función para obtener mensajes aleatorios del servidor
   const fetchRandomMessage = async () => {
@@ -26,11 +32,34 @@ export const MessageProvider = ({ children }) => {
         localStorage.setItem('messages', JSON.stringify(updatedMessages));
         return updatedMessages;
       });
-      localStorage.setItem('lastMessageTime', Date.now());
+
+      // Mostrar notificación
+      if (Notification.permission === 'granted') {
+        navigator.serviceWorker.ready.then(registration => {
+          registration.showNotification('Nuevo mensaje', {
+            body: randomMessage.body,
+            icon: '/icon.png',
+            badge: '/badge.png'
+          });
+        });
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
   };
+
+  // Solicitar permiso para notificaciones
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          console.log('Permiso para notificaciones concedido');
+        } else {
+          console.log('Permiso para notificaciones denegado');
+        }
+      });
+    }
+  }, []);
 
   // Obtener un mensaje aleatorio cada 30 segundos
   useEffect(() => {
@@ -46,24 +75,6 @@ export const MessageProvider = ({ children }) => {
     }, initialDelay);
 
     return () => clearTimeout(initialTimeout);
-  }, []);
-
-  // Mostrar mensaje de bienvenida solo una vez
-  useEffect(() => {
-    const welcomeMessageShown = localStorage.getItem('welcomeMessageShown');
-    if (!welcomeMessageShown) {
-      const welcomeMessage = {
-        id: Date.now(),
-        subject: 'Bienvenido a Banco Innova',
-        body: 'Gracias por unirte a Banco Innova. Estamos aquí para ayudarte con todas tus necesidades financieras.',
-      };
-      setMessages((prevMessages) => {
-        const updatedMessages = [welcomeMessage, ...prevMessages];
-        localStorage.setItem('messages', JSON.stringify(updatedMessages));
-        return updatedMessages;
-      });
-      localStorage.setItem('welcomeMessageShown', 'true');
-    }
   }, []);
 
   // Manejar favoritos

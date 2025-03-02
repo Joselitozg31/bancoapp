@@ -1,19 +1,50 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import CookiesModal from './CookiesModal';
 
 const Footer = () => {
   const [showCookieModal, setShowCookieModal] = useState(false); // Estado para mostrar u ocultar el modal de cookies
 
+  useEffect(() => {
+    const cookiePreference = getCookie('cookiePreference');
+    if (!cookiePreference) {
+      setShowCookieModal(true); // Mostrar el modal si no hay preferencia de cookies guardada
+    }
+  }, []);
+
   const handleAcceptAllCookies = () => {
-    // Lógica para aceptar todas las cookies
+    setCookie('cookiePreference', 'all', 365); // Guardar preferencia de aceptar todas las cookies
     setShowCookieModal(false); // Ocultar el modal de cookies
   };
 
   const handleAcceptEssentialCookies = () => {
-    // Lógica para aceptar solo las cookies esenciales
+    setCookie('cookiePreference', 'essential', 365); // Guardar preferencia de aceptar solo las cookies esenciales
     setShowCookieModal(false); // Ocultar el modal de cookies
+  };
+
+  const handleRejectAllCookies = () => {
+    setCookie('cookiePreference', 'none', 365); // Guardar preferencia de rechazar todas las cookies
+    setShowCookieModal(false); // Ocultar el modal de cookies
+  };
+
+  const setCookie = (name, value, days) => {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/";
+  };
+
+  const getCookie = (name) => {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
   };
 
   return (
@@ -23,9 +54,9 @@ const Footer = () => {
           <Link href="/contact" className="mx-2">
             Contacto
           </Link>
-          <button onClick={() => setShowCookieModal(true)} className="mx-2">
+          <Link href="#" onClick={() => setShowCookieModal(true)} className="mx-2">
             Política de Cookies
-          </button>
+          </Link>
           <Link href="/terms" className="mx-2">
             Términos y Condiciones
           </Link>
@@ -35,24 +66,13 @@ const Footer = () => {
         </div>
       </div>
 
-      {showCookieModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg">
-            <h2 className="text-lg font-bold mb-4">Política de Cookies</h2>
-            <p className="mb-4">
-              Utilizamos cookies para mejorar tu experiencia. Puedes aceptar todas las cookies o solo las esenciales.
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button onClick={handleAcceptEssentialCookies} className="bg-gray-500 text-white p-2 rounded-lg">
-                Aceptar Solo Esenciales
-              </button>
-              <button onClick={handleAcceptAllCookies} className="bg-blue-700 text-white p-2 rounded-lg">
-                Aceptar Todas
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CookiesModal
+        isOpen={showCookieModal}
+        onClose={() => setShowCookieModal(false)}
+        handleAcceptAllCookies={handleAcceptAllCookies}
+        handleAcceptEssentialCookies={handleAcceptEssentialCookies}
+        handleRejectAllCookies={handleRejectAllCookies}
+      />
     </footer>
   );
 };
