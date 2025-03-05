@@ -12,4 +12,9 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+export async function query(sql, values) {
+  const [results] = await pool.execute(sql, values);
+  return results;
+}
+
 export default pool;
