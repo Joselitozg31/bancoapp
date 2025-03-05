@@ -11,19 +11,19 @@ export default function AreaPersonal() {
   });
 
   useEffect(() => {
-    // Obtener document_number desde localStorage después de que el componente se haya montado
-    const documentNumber = localStorage.getItem('document_number');
-    console.log('Document number from localStorage:', documentNumber); // Log para verificar el document_number
+    // Obtener los datos del usuario desde localStorage después de que el componente se haya montado
+    const userData = JSON.parse(localStorage.getItem('user'));
+    console.log('User data from localStorage:', userData); // Log para verificar los datos del usuario
 
-    if (documentNumber) {
+    if (userData && userData.document_number) {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        document_number: documentNumber
+        document_number: userData.document_number
       }));
 
       async function fetchUser() {
         try {
-          const response = await fetch(`/api/dashboard/user?document_number=${documentNumber}`);
+          const response = await fetch(`/api/dashboard/user?document_number=${userData.document_number}`);
           if (!response.ok) {
             throw new Error('Error fetching user');
           }

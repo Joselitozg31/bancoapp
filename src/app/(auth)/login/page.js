@@ -32,11 +32,8 @@ export default function Login() {
       }
 
       const userData = await response.json();
-      localStorage.setItem('document_number', userData.document_number); // Guardar document_number en localStorage
+      localStorage.setItem('user', JSON.stringify(userData)); // Guardar todos los datos del usuario en localStorage
 
-      if (rememberUser) {
-        localStorage.setItem('user', JSON.stringify(userData)); // Guardar datos del usuario en localStorage si se seleccionó "Recordar usuario"
-      }
       router.push('/dashboard'); // Redirigir al dashboard después del login
     } catch (err) {
       setError(err.message); // Mostrar el mensaje de error
