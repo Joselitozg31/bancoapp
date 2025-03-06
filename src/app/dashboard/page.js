@@ -60,9 +60,15 @@ const DashboardPage = () => {
       .slice(0, limit) // Mostrar solo las transacciones más recientes según el límite
       .map(transaction => (
         <tr key={transaction.transaction_id} className="bg-transparent">
-          <td className="bg-transparent text-white rounded-lg">{transaction.amount} {getCurrencySymbol(accountCurrencies[transaction.account_iban])}</td>
-          <td className="bg-transparent text-white rounded-lg">{new Date(transaction.transaction_date).toLocaleString()}</td>
-          <td className="bg-transparent text-white rounded-lg">{transaction.concept}</td>
+          <td className={`bg-transparent rounded-lg ${type === 'income' ? 'text-green-500' : type === 'expense' ? 'text-red-500' : 'text-yellow-500'}`}>
+            {transaction.amount} {getCurrencySymbol(accountCurrencies[transaction.account_iban])}
+          </td>
+          <td className={`bg-transparent rounded-lg ${type === 'income' ? 'text-green-500' : type === 'expense' ? 'text-red-500' : 'text-yellow-500'}`}>
+            {new Date(transaction.transaction_date).toLocaleString()}
+          </td>
+          <td className={`bg-transparent rounded-lg ${type === 'income' ? 'text-green-500' : type === 'expense' ? 'text-red-500' : 'text-yellow-500'}`}>
+            {transaction.concept}
+          </td>
         </tr>
       ));
   };
@@ -72,9 +78,9 @@ const DashboardPage = () => {
       .filter(transaction => transaction.transaction_type === 'held')
       .map(transaction => (
         <tr key={transaction.transaction_id} className="bg-transparent">
-          <td className="bg-transparent text-white rounded-lg">{transaction.amount} {getCurrencySymbol(accountCurrencies[transaction.account_iban])}</td>
-          <td className="bg-transparent text-white rounded-lg">{new Date(transaction.transaction_date).toLocaleString()}</td>
-          <td className="bg-transparent text-white rounded-lg">{transaction.concept}</td>
+          <td className="bg-transparent text-yellow-500 rounded-lg">{transaction.amount} {getCurrencySymbol(accountCurrencies[transaction.account_iban])}</td>
+          <td className="bg-transparent text-yellow-500 rounded-lg">{new Date(transaction.transaction_date).toLocaleString()}</td>
+          <td className="bg-transparent text-yellow-500 rounded-lg">{transaction.concept}</td>
         </tr>
       ));
   };
@@ -97,46 +103,40 @@ const DashboardPage = () => {
       <Header />
       <div className="container max-w-3xl p-8 mt-16">
         <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-        <div className="flex flex-wrap justify-between space-y-12"> {/* Cambiado de space-y-8 a space-y-12 */}
-          <div className="w-full md:w-1/3 mb-24 mt-12"> {/* Cambiado de mb-12 a mb-24 y añadido mt-12 */}
+        <div className="flex flex-wrap justify-between space-y-12">
+          <div className="w-full md:w-1/3 mb-24 mt-12">
             <h2 className="text-2xl font-bold mb-4">Ingresos Recientes</h2>
             <div className="overflow-y-auto max-h-64 bg-gradient-to-br from-blue-900 to-slate-900 rounded-lg" style={{ scrollbarColor: 'gray transparent', scrollbarWidth: 'thin' }}>
-              <table className="w-full bg-transparent text-black rounded-lg shadow-md">
+              <table className="w-full bg-transparent rounded-lg shadow-md">
                 <thead>
                   <tr>
-                    <th className="text-white">Monto</th>
-                    <th className="text-white">Fecha</th>
-                    <th className="text-white">Concepto</th>
+                    <th className="text-white">Monto</th><th className="text-white">Fecha</th><th className="text-white">Concepto</th>
                   </tr>
                 </thead>
                 <tbody>{renderTransactions('income')}</tbody>
               </table>
             </div>
           </div>
-          <div className="w-full md:w-1/3 mb-24 mt-12"> {/* Cambiado de mb-12 a mb-24 y añadido mt-12 */}
+          <div className="w-full md:w-1/3 mb-24 mt-12">
             <h2 className="text-2xl font-bold mb-4">Gastos Recientes</h2>
             <div className="overflow-y-auto max-h-64 bg-gradient-to-br from-blue-900 to-slate-900 rounded-lg" style={{ scrollbarColor: 'gray transparent', scrollbarWidth: 'thin' }}>
-              <table className="w-full bg-transparent text-black rounded-lg shadow-md">
+              <table className="w-full bg-transparent rounded-lg shadow-md">
                 <thead>
                   <tr>
-                    <th className="text-white">Monto</th>
-                    <th className="text-white">Fecha</th>
-                    <th className="text-white">Concepto</th>
+                    <th className="text-white">Monto</th><th className="text-white">Fecha</th><th className="text-white">Concepto</th>
                   </tr>
                 </thead>
                 <tbody>{renderTransactions('expense')}</tbody>
               </table>
             </div>
           </div>
-          <div className="w-full md:w-1/3 mb-24 mt-12"> {/* Cambiado de mb-12 a mb-24 y añadido mt-12 */}
+          <div className="w-full md:w-1/3 mb-24 mt-12">
             <h2 className="text-2xl font-bold mb-4">Retenidos</h2>
             <div className="overflow-y-auto max-h-64 bg-gradient-to-br from-blue-900 to-slate-900 rounded-lg" style={{ scrollbarColor: 'gray transparent', scrollbarWidth: 'thin' }}>
-              <table className="w-full bg-transparent text-black rounded-lg shadow-md">
+              <table className="w-full bg-transparent rounded-lg shadow-md">
                 <thead>
                   <tr>
-                    <th className="text-white">Monto</th>
-                    <th className="text-white">Fecha</th>
-                    <th className="text-white">Concepto</th>
+                    <th className="text-white">Monto</th><th className="text-white">Fecha</th><th className="text-white">Concepto</th>
                   </tr>
                 </thead>
                 <tbody>{renderAllHeldTransactions()}</tbody>
