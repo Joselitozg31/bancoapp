@@ -3,11 +3,11 @@ import pool from '@/lib/database';
 
 export async function POST(req) {
   try {
-    const { password, document_number } = await req.json();
-    console.log('Received data:', { password, document_number }); // Log para verificar los datos recibidos
+    const { currentPassword, password, document_number } = await req.json();
+    console.log('Received data:', { currentPassword, password, document_number }); // Log para verificar los datos recibidos
 
-    if (!password || !document_number) {
-      return new Response(JSON.stringify({ error: 'Password and document number are required' }), {
+    if (!currentPassword || !password || !document_number) {
+      return new Response(JSON.stringify({ error: 'Current password, new password, and document number are required' }), {
         status: 400,
         headers: {
           'Content-Type': 'application/json',
@@ -15,9 +15,31 @@ export async function POST(req) {
       });
     }
 
-    // Cifrar la contraseña antes de almacenarla
+    // Obtener la contraseña actual del usuario desde la base de datos
+    const [rows] = await pool.query('SELECT password FROM users WHERE document_number = ?', [document_number]);
+    if (rows.length === 0) {
+      return new Response(JSON.stringify({ error: 'User not found' }), {
+        status: 404,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    const user = rows[0];
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return new Response(JSON.stringify({ error: 'Current password is incorrect' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    // Cifrar la nueva contraseña antes de almacenarla
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('Hashed password:', hashedPassword); // Log para verificar la contraseña cifrada
+    console.log('Hashed new password:', hashedPassword); // Log para verificar la nueva contraseña cifrada
 
     // Actualizar la contraseña en la base de datos
     const [result] = await pool.query('UPDATE users SET password = ? WHERE document_number = ?', [hashedPassword, document_number]);
