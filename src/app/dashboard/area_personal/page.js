@@ -1,10 +1,27 @@
-"use client"
+"use client";
 import { useEffect, useState } from 'react';
+
+const countries = [
+  { value: 'ES', label: 'España' },
+  { value: 'MX', label: 'México' },
+  { value: 'AR', label: 'Argentina' },
+  { value: 'CO', label: 'Colombia' },
+  { value: 'US', label: 'Estados Unidos' },
+];
+
+const nationalities = [
+  { value: 'ES', label: 'Española' },
+  { value: 'MX', label: 'Mexicana' },
+  { value: 'AR', label: 'Argentina' },
+  { value: 'CO', label: 'Colombiana' },
+  { value: 'US', label: 'Estadounidense' },
+];
 
 export default function AreaPersonal() {
   const [user, setUser] = useState(null); // Estado para almacenar los datos del usuario
   const [error, setError] = useState(null); // Estado para almacenar mensajes de error
   const [formData, setFormData] = useState({
+    currentPassword: '',
     password: '',
     confirmPassword: '',
     document_number: '' // Inicialmente vacío
@@ -51,7 +68,7 @@ export default function AreaPersonal() {
       return;
     }
 
-    console.log('Submitting data:', { password: formData.password, document_number: formData.document_number }); // Log para verificar los datos enviados
+    console.log('Submitting data:', { currentPassword: formData.currentPassword, password: formData.password, document_number: formData.document_number }); // Log para verificar los datos enviados
 
     try {
       const response = await fetch('/api/dashboard/update_password', {
@@ -59,7 +76,7 @@ export default function AreaPersonal() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ password: formData.password, document_number: formData.document_number }),
+        body: JSON.stringify({ currentPassword: formData.currentPassword, password: formData.password, document_number: formData.document_number }),
       });
 
       if (!response.ok) {
@@ -78,53 +95,130 @@ export default function AreaPersonal() {
     return <div>Error: {error}</div>; // Mostrar mensaje de error si existe
   }
 
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const getCountryLabel = (value) => {
+    const country = countries.find(country => country.value === value);
+    return country ? country.label : value;
+  };
+
+  const getNationalityLabel = (value) => {
+    const nationality = nationalities.find(nationality => nationality.value === value);
+    return nationality ? nationality.label : value;
+  };
+
   return (
-    <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 gap-4">
-        <h1 className="text-3xl font-bold mb-6 text-white">Datos del Usuario</h1>
+    <div className="min-h-full flex items-center justify-center">
+      <div className="container max-w-3xl p-8">
+        <h1 className="text-xl font-bold mb-6 text-white">Datos del Usuario</h1>
         <div className="grid grid-cols-1 gap-4">
           {user ? (
             <div key={user.document_number}>
-              <p><strong>Document Number:</strong> {user.document_number}</p>
-              <p><strong>First Name:</strong> {user.first_name}</p>
-              <p><strong>Last Name:</strong> {user.last_name}</p>
-              <p><strong>Birth Date:</strong> {user.birth_date}</p>
-              <p><strong>Email:</strong> {user.email}</p>
-              <p><strong>Phone:</strong> {user.phone}</p>
-              <p><strong>Country:</strong> {user.country}</p>
-              <p><strong>Nationality:</strong> {user.nationality}</p>
-              <p><strong>Document Type:</strong> {user.document_type}</p>
-              <p><strong>Address:</strong> {user.address}</p>
-              <p><strong>Verified:</strong> {user.verified ? 'Yes' : 'No'}</p>
-              <p><strong>Registration Date:</strong> {user.registration_date}</p>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <p className="text-xl font-bold"><strong>Tipo de Documento:</strong></p>
+                  <p className="text-xl">{user.document_type}</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold"><strong>Numero de Documento:</strong></p>
+                  <p className="text-xl">{user.document_number}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                <div>
+                  <p className="text-xl font-bold"><strong>Nombre:</strong></p>
+                  <p className="text-xl">{user.first_name}</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold"><strong>Apellido:</strong></p>
+                  <p className="text-xl">{user.last_name}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                <div>
+                  <p className="text-xl font-bold"><strong>Email:</strong></p>
+                  <p className="text-xl">{user.email}</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold"><strong>Phone:</strong></p>
+                  <p className="text-xl">{user.phone}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                <div>
+                  <input
+                    type="password"
+                    name="currentPassword"
+                    placeholder="Contraseña actual"
+                    value={formData.currentPassword}
+                    onChange={handleChange}
+                    className="w-full text-lg"
+                    required
+                  />
+                </div>
+                <div>
+                  <button type="submit" className="bg-blue-500 text-white w-full p-2 rounded-lg border-none transition-all duration-300 cursor-pointer hover:bg-blue-600 transform hover:scale-105 text-lg">
+                    💾
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                <div>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Nueva contraseña"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full text-lg"
+                    required
+                  />
+                </div>
+                <div>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="Confirmar nueva contraseña"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="w-full text-lg"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                <div>
+                  <p className="text-xl font-bold"><strong>Fecha de cumpleaños:</strong></p>
+                  <p className="text-xl">{formatDate(user.birth_date)}</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold"><strong>Fecha de registro:</strong></p>
+                  <p className="text-xl">{formatDate(user.registration_date)}</p>
+                </div>
+              </div>
+              <h2 className="text-xl font-bold mt-6">Datos Fiscales</h2>
+              <div className="grid grid-cols-3 gap-2 mb-6">
+                <div>
+                  <p className="text-xl font-bold"><strong>Country:</strong></p>
+                  <p className="text-xl">{getCountryLabel(user.country)}</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold"><strong>Nationality:</strong></p>
+                  <p className="text-xl">{getNationalityLabel(user.nationality)}</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold"><strong>Address:</strong></p>
+                  <p className="text-xl">{user.address}</p>
+                </div>
+              </div>
             </div>
           ) : (
-            <p>Cargando datos del usuario...</p> // Mostrar mensaje de carga mientras se obtienen los datos del usuario
+            <p className="text-xl">Cargando datos del usuario...</p> // Mostrar mensaje de carga mientras se obtienen los datos del usuario
           )}
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="password"
-            name="password"
-            placeholder="Nueva contraseña"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full"
-            required
-          />
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="Confirmar nueva contraseña"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className="w-full"
-            required
-          />
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
-            Guardar cambios
-          </button>
-        </form>
       </div>
     </div>
   );
