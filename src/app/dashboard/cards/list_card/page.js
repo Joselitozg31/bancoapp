@@ -1,3 +1,4 @@
+'use client';
 // Importar módulos necesarios
 import { useState, useEffect } from 'react';
 
