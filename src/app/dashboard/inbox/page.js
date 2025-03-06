@@ -2,6 +2,7 @@
 import React, { useContext, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import { MessageContext } from '@/context/messagecontext';
+import Header from '@/components/header';
 
 const InboxPage = () => {
   const { messages, favorites, handleFavorite, setMessages } = useContext(MessageContext);
@@ -15,8 +16,9 @@ const InboxPage = () => {
   };
 
   return (
-    <div className="min-h-full flex items-center justify-center bg-gradient-to-br from-blue-900 to-slate-900 text-white py-6">
-      <div className="container max-w-3xl p-8">
+    <div className="min-h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-900 to-slate-900 text-white py-6">
+      <Header/>
+      <div className="container max-w-3xl p-8 mt-16"> 
         <h1 className="text-3xl font-bold mb-6">Bandeja de Entrada</h1>
         <div className="space-y-4 max-h-[70vh] overflow-y-auto">
           {messages.map((message) => (
