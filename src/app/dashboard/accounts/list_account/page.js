@@ -1,59 +1,75 @@
 'use client';
-// Importar módulos necesarios
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Header from '@/components/header';
 
-// Función principal para la página de cuentas
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const router = useRouter();
 
-  // Efecto para cargar las cuentas al montar el componente
   useEffect(() => {
-    fetch('/api/dashboard/list_accounts')
-      .then(response => response.json())
-      .then(data => {
-        setAccounts(data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching accounts:', error);
-        setLoading(false);
-      });
-  }, []);
+    const fetchAccounts = async () => {
+      try {
+        // Obtener datos del usuario del localStorage
+        const userData = JSON.parse(localStorage.getItem('user'));
+        
+        if (!userData || !userData.document_number) {
+          router.push('/login');
+          return;
+        }
 
-  // Mostrar mensaje de carga mientras se obtienen los datos
+        const response = await fetch('/api/dashboard/accounts/list_account', {
+          headers: {
+            'Content-Type': 'application/json',
+            'document_number': userData.document_number
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al obtener las cuentas');
+        }
+
+        const data = await response.json();
+        setAccounts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccounts();
+  }, [router]);
+
   if (loading) return <div>Cargando...</div>;
+  if (error) return <div>Error: {error}</div>;
 
-  // Renderizar la tabla de cuentas
   return (
-    <div>
-      <h1>Cuentas Bancarias</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>IBAN</th>
-            <th>Tipo de Cuenta</th>
-            <th>Moneda</th>
-            <th>Balance Total</th>
-            <th>Balance Disponible</th>
-            <th>Balance Retenido</th>
-            <th>Fecha de Apertura</th>
-          </tr>
-        </thead>
-        <tbody>
-          {accounts.map(account => (
-            <tr key={account.iban}>
-              <td>{account.iban}</td>
-              <td>{account.account_type}</td>
-              <td>{account.currency}</td>
-              <td>{account.total_balance}</td>
-              <td>{account.available_balance}</td>
-              <td>{account.held_balance}</td>
-              <td>{account.opening_date}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="min-h-full flex flex-col items-center justify-center bg-blue-900 pt-24">
+      <Header />
+      <div className="container max-w-4xl p-8 bg-white bg-opacity-75 rounded-lg shadow-lg mt-24">
+        <h1 className="text-xl font-bold mb-6 text-center text-white">Cuentas Bancarias</h1>
+        {accounts.length > 0 ? (
+          <div className="space-y-4">
+            {accounts.map(account => (
+              <div key={account.iban} className="mb-4 p-4 bg-blue-900 bg-opacity-75 rounded-lg shadow-md">
+                <p className="text-white"><strong>IBAN:</strong> {account.iban}</p>
+                <p className="text-white"><strong>Tipo de Cuenta:</strong> {account.account_type}</p>
+                <p className="text-white"><strong>Moneda:</strong> {account.currency}</p>
+                <p className="text-white"><strong>Balance Total:</strong> {account.total_balance}</p>
+                <p className="text-white"><strong>Balance Disponible:</strong> {account.available_balance}</p>
+                <p className="text-white"><strong>Balance Retenido:</strong> {account.held_balance}</p>
+                <p className="text-white"><strong>Fecha de Apertura:</strong> {new Date(account.opening_date).toLocaleDateString()}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-white text-center">No se encontraron cuentas</p>
+        )}
+      </div>
     </div>
   );
 }

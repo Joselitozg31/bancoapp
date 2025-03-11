@@ -1,85 +1,42 @@
 'use client';
-// Importar módulos necesarios
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Header from '@/components/header';
 
-// Componente principal para la página de contratación de cuentas
 export default function ContractAccountPage() {
-  // Estado para los datos de la nueva cuenta
-  const [newAccount, setNewAccount] = useState({
-    iban: '',
-    account_type: '',
-    currency: '',
-    total_balance: '',
-    available_balance: '',
-    held_balance: '',
-    opening_date: '',
-  });
-
-  // Estado para las cuentas existentes
-  const [accounts, setAccounts] = useState([]);
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    account_type: '',
+    currency: 'EUR'
+  });
 
-  // Función para manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // Enviar solicitud para contratar una nueva cuenta
-      const response = await fetch('/api/dashboard/contract_account', {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      if (!userData || !userData.document_number) {
+        throw new Error('Usuario no autenticado');
+      }
+
+      const response = await fetch('/api/dashboard/accounts/contract_account', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAccount),
+        headers: {
+          'Content-Type': 'application/json',
+          'document_number': userData.document_number
+        },
+        body: JSON.stringify(formData)
       });
 
-      // Manejar errores en la respuesta
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message);
+        throw new Error('Error al contratar la cuenta');
       }
 
-      // Obtener la cuenta creada de la respuesta
-      const createdAccount = await response.json();
-      setAccounts([...accounts, createdAccount]);
-
-      // Restablecer el formulario
-      setNewAccount({
-        iban: '',
-        account_type: '',
-        currency: '',
-        total_balance: '',
-        available_balance: '',
-        held_balance: '',
-        opening_date: '',
-      });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Función para manejar la eliminación de una cuenta
-  const handleDelete = async (iban) => {
-    setLoading(true);
-    setError('');
-
-    try {
-      // Enviar solicitud para eliminar una cuenta
-      const response = await fetch(`/api/dashboard/delete_account?iban=${iban}`, {
-        method: 'DELETE',
-      });
-
-      // Manejar errores en la respuesta
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message);
-      }
-
-      // Actualizar el estado para eliminar la cuenta de la lista
-      setAccounts(accounts.filter(account => account.iban !== iban));
+      router.push('/dashboard/accounts/list_account');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -88,100 +45,56 @@ export default function ContractAccountPage() {
   };
 
   return (
-    <div>
-      <h1>Contratar Cuenta</h1>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="IBAN"
-          value={newAccount.iban}
-          onChange={e => setNewAccount({ ...newAccount, iban: e.target.value })}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Tipo de Cuenta"
-          value={newAccount.account_type}
-          onChange={e => setNewAccount({ ...newAccount, account_type: e.target.value })}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Moneda"
-          value={newAccount.currency}
-          onChange={e => setNewAccount({ ...newAccount, currency: e.target.value })}
-          required
-        />
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Balance Total"
-          value={newAccount.total_balance}
-          onChange={e => setNewAccount({ ...newAccount, total_balance: e.target.value })}
-          required
-        />
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Balance Disponible"
-          value={newAccount.available_balance}
-          onChange={e => setNewAccount({ ...newAccount, available_balance: e.target.value })}
-          required
-        />
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Balance Retenido"
-          value={newAccount.held_balance}
-          onChange={e => setNewAccount({ ...newAccount, held_balance: e.target.value })}
-          required
-        />
-        <input
-          type="date"
-          placeholder="Fecha de Apertura"
-          value={newAccount.opening_date}
-          onChange={e => setNewAccount({ ...newAccount, opening_date: e.target.value })}
-          required
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Creando...' : 'Crear Cuenta'}
-        </button>
-      </form>
+    <div className="min-h-full flex flex-col items-center justify-center bg-blue-900 pt-24">
+      <Header />
+      <div className="container max-w-2xl p-8 bg-white bg-opacity-75 rounded-lg shadow-lg mt-24">
+        <h1 className="text-2xl font-bold mb-6 text-center text-white">Contratar Nueva Cuenta</h1>
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
 
-      <h2>Cuentas Existentes</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>IBAN</th>
-            <th>Tipo de Cuenta</th>
-            <th>Moneda</th>
-            <th>Balance Total</th>
-            <th>Balance Disponible</th>
-            <th>Balance Retenido</th>
-            <th>Fecha de Apertura</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {accounts.map(account => (
-            <tr key={account.iban}>
-              <td>{account.iban}</td>
-              <td>{account.account_type}</td>
-              <td>{account.currency}</td>
-              <td>{account.total_balance}</td>
-              <td>{account.available_balance}</td>
-              <td>{account.held_balance}</td>
-              <td>{account.opening_date}</td>
-              <td>
-                <button onClick={() => handleDelete(account.iban)} disabled={loading}>
-                  {loading ? 'Eliminando...' : 'Eliminar'}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-white mb-2">Tipo de Cuenta</label>
+            <select
+              value={formData.account_type}
+              onChange={(e) => setFormData({...formData, account_type: e.target.value})}
+              className="w-full p-2 rounded"
+              required
+            >
+              <option value="">Seleccione tipo de cuenta</option>
+              <option value="AHORRO">Cuenta de Ahorro</option>
+              <option value="CORRIENTE">Cuenta Corriente</option>
+              <option value="NOMINA">Cuenta Nómina</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-white mb-2">Moneda</label>
+            <select
+              value={formData.currency}
+              onChange={(e) => setFormData({...formData, currency: e.target.value})}
+              className="w-full p-2 rounded"
+              required
+            >
+              <option value="EUR">Euro (EUR)</option>
+              <option value="USD">Dólar (USD)</option>
+              <option value="GBP">Libra (GBP)</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-300"
+          >
+            {loading ? 'Contratando...' : 'Contratar Cuenta'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,32 +1,54 @@
-// Importar funciones necesarias
 import { contractCard } from '@/lib/cards';
-import { verifyToken } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
-// Función para manejar la solicitud POST para contratar una tarjeta
 export async function POST(request) {
   try {
-    // Verificar el token del usuario
-    const user = verifyToken(request);
+    // Obtener el document_number desde los headers
+    const document_number = request.headers.get('document_number');
+
+    if (!document_number) {
+      return NextResponse.json({ message: 'Usuario no autenticado' }, { status: 401 });
+    }
 
     // Obtener los datos de la tarjeta del cuerpo de la solicitud
     const cardData = await request.json();
 
     // Verificar que todos los campos requeridos estén presentes
-    if (!cardData.card_number || !cardData.card_type || !cardData.expiration_date || !cardData.hiring_date || !cardData.ccv || !cardData.account_iban) {
-      return NextResponse.json({ message: 'Todos los campos son requeridos' }, { status: 400 });
+    if (!cardData.card_type || !cardData.account_iban) {
+      return NextResponse.json({ message: 'Tipo de tarjeta y cuenta asociada son requeridos' }, { status: 400 });
     }
 
-    // Asignar el número de documento del usuario a los datos de la tarjeta
-    cardData.user_document_number = user.id;
+    // Generar datos automáticos de la tarjeta
+    const newCardData = {
+      ...cardData,
+      card_number: generateCardNumber(),
+      expiration_date: generateExpirationDate(),
+      hiring_date: new Date().toISOString().split('T')[0],
+      ccv: generateCCV(),
+      user_document_number: document_number
+    };
 
     // Contratar la tarjeta
-    const newCard = await contractCard(cardData);
+    const newCard = await contractCard(newCardData);
 
     // Devolver una respuesta exitosa
     return NextResponse.json({ message: 'Tarjeta creada exitosamente', card: newCard });
   } catch (error) {
-    // Manejar errores y devolver una respuesta de error
     return NextResponse.json({ message: error.message }, { status: 400 });
   }
+}
+
+// Funciones auxiliares para generar datos de tarjeta
+function generateCardNumber() {
+  return Math.floor(Math.random() * 9000000000000000) + 1000000000000000;
+}
+
+function generateExpirationDate() {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() + 3);
+  return date.toISOString().split('T')[0];
+}
+
+function generateCCV() {
+  return Math.floor(Math.random() * 900) + 100;
 }

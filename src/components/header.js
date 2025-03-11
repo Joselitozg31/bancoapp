@@ -1,36 +1,40 @@
-// javilin
-// Importar React y el hook useState
 import React, { useState, useEffect } from 'react';
 
-// Componente Header que recibe la cuenta del usuario como prop
 const Header = ({ userAccount }) => {
-  // Estado para controlar si el menú está abierto o cerrado
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [transactionsMenuOpen, setTransactionsMenuOpen] = useState(false);
+  const [accountsMenuOpen, setAccountsMenuOpen] = useState(false);
+  const [cardsMenuOpen, setCardsMenuOpen] = useState(false);
 
-  // Función para alternar el estado del menú
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
 
-  // Función para alternar el estado del menú de usuario
   const toggleUserMenu = () => {
     setUserMenuOpen(!userMenuOpen);
   };
 
-  // Función para alternar el estado del submenú de transacciones
   const toggleTransactionsMenu = () => {
     setTransactionsMenuOpen(!transactionsMenuOpen);
   };
 
-  // Cerrar menús al hacer clic fuera de ellos
+  const toggleAccountsMenu = () => {
+    setAccountsMenuOpen(!accountsMenuOpen);
+  };
+
+  const toggleCardsMenu = () => {
+    setCardsMenuOpen(!cardsMenuOpen);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.menu-button') && !event.target.closest('.menu-content')) {
         setMenuOpen(false);
         setUserMenuOpen(false);
         setTransactionsMenuOpen(false);
+        setAccountsMenuOpen(false);
+        setCardsMenuOpen(false);
       }
     };
 
@@ -50,14 +54,37 @@ const Header = ({ userAccount }) => {
         </button>
         {menuOpen && (
           <div className="absolute left-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg z-10 menu-content">
-            <a href="/dashboard/accounts/list_account" className="block px-4 py-2 hover:bg-gray-200">Cuentas</a>
-            <a href="/dashboard/cards/list_card" className="block px-4 py-2 hover:bg-gray-200">Tarjetas</a>
+            <div className="relative">
+              <button onClick={toggleAccountsMenu} className="block w-full text-left px-4 py-2 hover:bg-gray-200 focus:outline-none">
+                Cuentas
+                <span className="float-right">▶</span>
+              </button>
+              {accountsMenuOpen && (
+                <div className="absolute left-full top-0 w-48 bg-white text-black rounded-md shadow-lg">
+                  <a href="/dashboard/accounts/list_account" className="block px-4 py-2 hover:bg-gray-200">Ver Cuentas</a>
+                  <a href="/dashboard/accounts/contract_account" className="block px-4 py-2 hover:bg-gray-200">Contratar Cuenta</a>
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <button onClick={toggleCardsMenu} className="block w-full text-left px-4 py-2 hover:bg-gray-200 focus:outline-none">
+                Tarjetas
+                <span className="float-right">▶</span>
+              </button>
+              {cardsMenuOpen && (
+                <div className="absolute left-full top-0 w-48 bg-white text-black rounded-md shadow-lg">
+                  <a href="/dashboard/cards/list_card" className="block px-4 py-2 hover:bg-gray-200">Ver Tarjetas</a>
+                  <a href="/dashboard/cards/contract_card" className="block px-4 py-2 hover:bg-gray-200">Contratar Tarjeta</a>
+                </div>
+              )}
+            </div>
             <div className="relative">
               <button onClick={toggleTransactionsMenu} className="block w-full text-left px-4 py-2 hover:bg-gray-200 focus:outline-none">
                 Transacciones
+                <span className="float-right">▶</span>
               </button>
               {transactionsMenuOpen && (
-                <div className="absolute left-full top-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg z-10">
+                <div className="absolute left-full top-0 w-48 bg-white text-black rounded-md shadow-lg">
                   <a href="/dashboard/transactions/transfer" className="block px-4 py-2 hover:bg-gray-200">Realizar transferencia</a>
                   <a href="/dashboard/transactions/history" className="block px-4 py-2 hover:bg-gray-200">Historial</a>
                 </div>
@@ -80,6 +107,7 @@ const Header = ({ userAccount }) => {
           <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg z-10 menu-content">
             <a href="/dashboard/area_personal" className="block px-4 py-2 hover:bg-gray-200">Área Personal</a>
             <a href="/dashboard/inbox" className="block px-4 py-2 hover:bg-gray-200">Inbox</a>
+            <a href="/login" className="block px-4 py-2 hover:bg-gray-200 text-red-600">Cerrar Sesión</a>
           </div>
         )}
       </div>
@@ -87,5 +115,4 @@ const Header = ({ userAccount }) => {
   );
 };
 
-// Exportar el componente Header para su uso en otros archivos
 export default Header;

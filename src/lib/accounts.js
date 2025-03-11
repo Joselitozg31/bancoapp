@@ -1,55 +1,89 @@
 import pool from './database';
 
-// Función para contratar una cuenta
-export async function contractAccount(accountData) {
-  const {
-    iban,
-    account_type,
-    currency,
-    total_balance,
-    available_balance,
-    held_balance,
-    opening_date,
-    user_document_number,
-  } = accountData;
+export async function listAccounts(user_document_id) {
+  try {
+    const query = `
+      SELECT accounts.* 
+      FROM accounts
+      INNER JOIN user_accounts ON accounts.iban = user_accounts.account_iban
+      WHERE user_accounts.user_document_number = ?
+    `;
+    
+    const [rows] = await pool.query(query, [user_document_id]);
+    
+    if (!rows || rows.length === 0) {
+      return [];
+    }
 
-  const [result] = await pool.query(
-    `INSERT INTO accounts (
-      iban, account_type, currency, total_balance, available_balance, held_balance, opening_date, user_document_number
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      iban,
+    return rows;
+  } catch (error) {
+    console.error('Error al listar cuentas:', error);
+    throw new Error('Error al obtener las cuentas del usuario');
+  }
+}
+
+export async function contractAccount(accountData) {
+  try {
+    const {
       account_type,
       currency,
-      total_balance,
-      available_balance,
-      held_balance,
-      opening_date,
-      user_document_number,
-    ]
-  );
+      user_document_number
+    } = accountData;
 
-  return result.insertId;
-}
+    // Generar IBAN aleatorio
+    const iban = generateIBAN();
 
-// Función para listar las cuentas de un usuario
-export async function listAccounts(user_document_number) {
-  const [rows] = await pool.query('SELECT * FROM accounts WHERE user_document_number = ?', [user_document_number]);
+    // Insertar la cuenta en la base de datos
+    const [result] = await pool.query(
+      `INSERT INTO accounts (
+        iban, account_type, currency, total_balance, available_balance, held_balance, opening_date
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        iban,
+        account_type,
+        currency,
+        0, // balance inicial
+        0, // balance disponible inicial
+        0, // balance retenido inicial
+        new Date().toISOString().split('T')[0] // fecha actual
+      ]
+    );
+    if (result.affectedRows === 0) {
+      throw new Error('Error al crear la cuenta');
+    }
 
-  if (rows.length === 0) {
-    throw new Error('Cuentas no encontradas');
+    // Vincular la cuenta con el usuario
+    await pool.query(
+      'INSERT INTO user_accounts (user_document_number, account_iban) VALUES (?, ?)',
+      [user_document_number, iban]
+    );
+
+    return { iban };
+  } catch (error) {
+    console.error('Error al contratar cuenta:', error);
+    throw new Error('Error al crear la cuenta');
   }
-
-  return rows;
 }
 
-// Función para eliminar una cuenta
+// Función auxiliar para generar IBAN
+function generateIBAN() {
+  const countryCode = 'ES';
+  const bankCode = '2100';
+  const accountNumber = Math.random().toString().slice(2, 12);
+  return `${countryCode}${bankCode}${accountNumber}`;
+}
+
 export async function deleteAccount(iban) {
-  const [result] = await pool.query('DELETE FROM accounts WHERE iban = ?', [iban]);
+  try {
+    const [result] = await pool.query('DELETE FROM accounts WHERE iban = ?', [iban]);
 
-  if (result.affectedRows === 0) {
-    throw new Error('Cuenta no encontrada');
+    if (result.affectedRows === 0) {
+      throw new Error('Cuenta no encontrada');
+    }
+
+    return result.affectedRows;
+  } catch (error) {
+    console.error('Error al eliminar cuenta:', error);
+    throw new Error('Error al eliminar la cuenta');
   }
-
-  return result.affectedRows;
 }

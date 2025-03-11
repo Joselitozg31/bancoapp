@@ -1,57 +1,86 @@
 'use client';
-// Importar módulos necesarios
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Header from '@/components/header';
 
-// Función principal para la página de tarjetas
 export default function CardsPage() {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const router = useRouter();
 
-  // Efecto para cargar las tarjetas al montar el componente
   useEffect(() => {
-    fetch('/api/dashboard/list_cards')
-      .then(response => response.json())
-      .then(data => {
-        setCards(data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching cards:', error);
-        setLoading(false);
-      });
-  }, []);
+    const fetchCards = async () => {
+      try {
+        // Obtener datos del usuario del localStorage
+        const userData = JSON.parse(localStorage.getItem('user'));
+        
+        if (!userData || !userData.document_number) {
+          router.push('/login');
+          return;
+        }
 
-  // Mostrar mensaje de carga mientras se obtienen los datos
+        const response = await fetch('/api/dashboard/cards/list_card', {
+          headers: {
+            'Content-Type': 'application/json',
+            'document_number': userData.document_number
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al obtener las tarjetas');
+        }
+
+        const data = await response.json();
+        setCards(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCards();
+  }, [router]);
+
   if (loading) return <div>Cargando...</div>;
+  if (error) return <div>Error: {error}</div>;
 
-  // Renderizar la tabla de tarjetas
   return (
-    <div>
-      <h1>Tarjetas Bancarias</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Número de Tarjeta</th>
-            <th>Tipo de Tarjeta</th>
-            <th>Fecha de Expiración</th>
-            <th>Fecha de Contratación</th>
-            <th>CCV</th>
-            <th>IBAN de la Cuenta</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cards.map(card => (
-            <tr key={card.card_number}>
-              <td>{card.card_number}</td>
-              <td>{card.card_type}</td>
-              <td>{card.expiration_date}</td>
-              <td>{card.hiring_date}</td>
-              <td>{card.ccv}</td>
-              <td>{card.account_iban}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="min-h-full flex flex-col items-center justify-center bg-blue-900 pt-24">
+      <Header />
+      <div className="container max-w-4xl p-8 bg-white bg-opacity-75 rounded-lg shadow-lg mt-24">
+        <h1 className="text-xl font-bold mb-6 text-center text-white">Tarjetas Bancarias</h1>
+        {cards.length > 0 ? (
+          <table className="w-full">
+            <thead>
+              <tr className="text-white">
+                <th className="p-2">Número de Tarjeta</th>
+                <th className="p-2">Tipo de Tarjeta</th>
+                <th className="p-2">Fecha de Expiración</th>
+                <th className="p-2">Fecha de Contratación</th>
+                <th className="p-2">CCV</th>
+                <th className="p-2">IBAN de la Cuenta</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cards.map(card => (
+                <tr key={card.card_number} className="text-white bg-blue-900 bg-opacity-75">
+                  <td className="p-2">{card.card_number}</td>
+                  <td className="p-2">{card.card_type}</td>
+                  <td className="p-2">{new Date(card.expiration_date).toLocaleDateString()}</td>
+                  <td className="p-2">{new Date(card.hiring_date).toLocaleDateString()}</td>
+                  <td className="p-2">{card.ccv}</td>
+                  <td className="p-2">{card.account_iban}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-white text-center">No se encontraron tarjetas</p>
+        )}
+      </div>
     </div>
   );
 }
