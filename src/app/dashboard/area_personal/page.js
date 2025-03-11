@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import Header from '@/components/header';
 
 const countries = [
   { value: 'ES', label: 'España' },
@@ -112,6 +113,7 @@ export default function AreaPersonal() {
 
   return (
     <div className="min-h-full flex items-center justify-center">
+      <Header />
       <div className="container max-w-3xl p-8">
         <h1 className="text-xl font-bold mb-6 text-white">Datos del Usuario</h1>
         <div className="grid grid-cols-1 gap-4">

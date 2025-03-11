@@ -7,13 +7,24 @@ export default function ContractAccountPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showCheckboxError, setShowCheckboxError] = useState(false);
   const [formData, setFormData] = useState({
     account_type: '',
-    currency: 'EUR'
+    currency: 'EUR',
+    termsAccepted: false,
+    privacyAccepted: false
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.termsAccepted || !formData.privacyAccepted) {
+      setShowCheckboxError(true);
+      setError('Debes aceptar los términos y la política de privacidad');
+      return;
+    }
+    
+    setShowCheckboxError(false);
     setLoading(true);
     setError('');
 
@@ -86,9 +97,43 @@ export default function ContractAccountPage() {
             </select>
           </div>
 
+          <div className="space-y-4 flex flex-col items-center">
+            <div className="flex items-center justify-center w-full">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={formData.termsAccepted}
+                onChange={(e) => setFormData({...formData, termsAccepted: e.target.checked})}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="terms" className="ml-2 block text-sm text-white">
+                Acepto los términos y condiciones
+              </label>
+            </div>
+
+            <div className="flex items-center justify-center w-full">
+              <input
+                type="checkbox"
+                id="privacy"
+                checked={formData.privacyAccepted}
+                onChange={(e) => setFormData({...formData, privacyAccepted: e.target.checked})}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="privacy" className="ml-2 block text-sm text-white">
+                Firmar acuerdo
+              </label>
+            </div>
+
+            {showCheckboxError && (!formData.termsAccepted || !formData.privacyAccepted) && (
+              <p className="text-red-500 text-sm font-medium">
+                * Debes marcar ambas casillas para continuar
+              </p>
+            )}
+          </div>
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !formData.termsAccepted || !formData.privacyAccepted}
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-300"
           >
             {loading ? 'Contratando...' : 'Contratar Cuenta'}

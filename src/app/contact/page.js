@@ -1,7 +1,12 @@
+'use client';
 import React from 'react';
+import Header from '@/components/header';
+
 
 const ContactPage = () => {
   return (
+    <div className="min-h-full flex items-center justify-center">
+      <Header />
     <div className="container mx-auto p-4 mb-16 max-w-2xl">
       <div className="flex justify-between">
         <div className="w-1/2 pr-4">
@@ -39,6 +44,7 @@ const ContactPage = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

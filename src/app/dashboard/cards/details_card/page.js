@@ -1,6 +1,6 @@
 // monje front end
 "use client";
-
+import Header from '@/components/header';
 import React, { useState, useEffect } from 'react';
 
 const Page = () => {
@@ -41,6 +41,7 @@ const Page = () => {
 
   return (
     <div className="min-h-full flex items-center justify-center">
+      <Header />
       <div className="container max-w-3xl p-8">
         <h1 className="text-3xl font-bold mb-6 text-white">Detalles de la Tarjeta</h1>
         <ul className="space-y-4">
