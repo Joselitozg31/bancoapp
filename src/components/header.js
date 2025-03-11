@@ -124,7 +124,7 @@ const Header = ({ userAccount }) => {
             <a href="/dashboard/inbox" className="block px-4 py-2 hover:bg-gray-200">Inbox</a>
             <button 
               onClick={handleLogout}
-              className="w-full text-left px-4 py-2 hover:bg-gray-200 text-red-600"
+              className="w-full text-left px-4 py-2 hover:bg-gray-200 text-red-600 bg-white"
             >
               Cerrar Sesión
             </button>

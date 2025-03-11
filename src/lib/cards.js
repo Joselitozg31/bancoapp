@@ -68,15 +68,36 @@ export async function contractCard(cardData) {
   }
 }
 
-export async function deleteCard(card_number) {
+export async function verifyCardOwnership(cardNumber, documentNumber) {
   try {
-    const [result] = await pool.query('DELETE FROM cards WHERE card_number = ?', [card_number]);
+    const [rows] = await pool.query(
+      'SELECT * FROM cards WHERE card_number = ? AND user_document_number = ?',
+      [cardNumber, documentNumber]
+    );
+    
+    if (!rows || rows.length === 0) {
+      return null;
+    }
+    
+    return rows[0];
+  } catch (error) {
+    console.error('Error al verificar tarjeta:', error);
+    throw new Error('Error al verificar la propiedad de la tarjeta');
+  }
+}
+
+export async function deleteCard(cardNumber, documentNumber) {
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM cards WHERE card_number = ? AND user_document_number = ?',
+      [cardNumber, documentNumber]
+    );
 
     if (result.affectedRows === 0) {
-      throw new Error('Tarjeta no encontrada');
+      throw new Error('Tarjeta no encontrada o no pertenece al usuario');
     }
 
-    return result.affectedRows;
+    return true;
   } catch (error) {
     console.error('Error al eliminar tarjeta:', error);
     throw new Error('Error al eliminar la tarjeta');

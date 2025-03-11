@@ -73,6 +73,14 @@ export default function CardsPage() {
                   <td className="p-2">{new Date(card.hiring_date).toLocaleDateString()}</td>
                   <td className="p-2">{card.ccv}</td>
                   <td className="p-2">{card.account_iban}</td>
+                  <td className="p-2">
+                    <button
+                      onClick={() => router.push(`/dashboard/cards/close_card?cardNumber=${card.card_number}`)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                    >
+                      Dar de baja
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

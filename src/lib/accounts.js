@@ -73,17 +73,73 @@ function generateIBAN() {
   return `${countryCode}${bankCode}${accountNumber}`;
 }
 
-export async function deleteAccount(iban) {
+export async function deleteAccount(iban, documentNumber) {
   try {
-    const [result] = await pool.query('DELETE FROM accounts WHERE iban = ?', [iban]);
+    // Primero verificamos si hay tarjetas asociadas
+    const [cards] = await pool.query(
+      'SELECT * FROM cards WHERE account_iban = ?',
+      [iban]
+    );
 
-    if (result.affectedRows === 0) {
-      throw new Error('Cuenta no encontrada');
+    if (cards && cards.length > 0) {
+      throw new Error('No se puede eliminar la cuenta porque tiene tarjetas asociadas');
     }
 
-    return result.affectedRows;
+    // Comenzar transacción
+    await pool.query('START TRANSACTION');
+
+    try {
+      // Primero eliminar la relación en user_accounts
+      const [userAccountResult] = await pool.query(
+        'DELETE FROM user_accounts WHERE account_iban = ? AND user_document_number = ?',
+        [iban, documentNumber]
+      );
+
+      if (userAccountResult.affectedRows === 0) {
+        throw new Error('Error al eliminar la relación usuario-cuenta');
+      }
+
+      // Después eliminar la cuenta
+      const [accountResult] = await pool.query(
+        'DELETE FROM accounts WHERE iban = ?',
+        [iban]
+      );
+
+      if (accountResult.affectedRows === 0) {
+        throw new Error('Error al eliminar la cuenta');
+      }
+
+      // Confirmar transacción
+      await pool.query('COMMIT');
+      return true;
+    } catch (error) {
+      // Si hay error, revertir cambios
+      await pool.query('ROLLBACK');
+      throw error;
+    }
   } catch (error) {
     console.error('Error al eliminar cuenta:', error);
-    throw new Error('Error al eliminar la cuenta');
+    throw new Error(error.message || 'Error al eliminar la cuenta');
+  }
+}
+
+export async function verifyAccountOwnership(iban, documentNumber) {
+  try {
+    const [rows] = await pool.query(
+      `SELECT a.* 
+       FROM accounts a
+       INNER JOIN user_accounts ua ON a.iban = ua.account_iban
+       WHERE a.iban = ? AND ua.user_document_number = ?`,
+      [iban, documentNumber]
+    );
+    
+    if (!rows || rows.length === 0) {
+      return null;
+    }
+    
+    return rows[0];
+  } catch (error) {
+    console.error('Error al verificar cuenta:', error);
+    throw new Error('Error al verificar la propiedad de la cuenta');
   }
 }

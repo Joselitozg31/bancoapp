@@ -1,30 +1,42 @@
-// Importar funciones necesarias
-import { deleteAccount } from '@/lib/accounts';
-import { verifyToken } from '@/lib/auth';
+import { verifyAccountOwnership, deleteAccount } from '@/lib/accounts';
 import { NextResponse } from 'next/server';
 
-// Función para manejar la solicitud DELETE para eliminar una cuenta
-export async function DELETE(request) {
+export async function POST(request) {
   try {
-    // Verificar el token del usuario
-    const user = verifyToken(request);
+    const { iban, documentNumber } = await request.json();
 
-    // Obtener el IBAN de los parámetros de la URL
-    const { searchParams } = new URL(request.url);
-    const iban = searchParams.get('iban');
-    
-    // Verificar que el IBAN esté presente
-    if (!iban) {
-      return NextResponse.json({ message: 'IBAN requerido' }, { status: 400 });
+    if (!iban || !documentNumber) {
+      return NextResponse.json(
+        { message: 'IBAN y documento requeridos' }, 
+        { status: 400 }
+      );
     }
 
-    // Eliminar la cuenta
-    await deleteAccount(iban);
+    const account = await verifyAccountOwnership(iban, documentNumber);
+    
+    if (!account) {
+      return NextResponse.json(
+        { message: 'La cuenta no existe o no pertenece al usuario' },
+        { status: 404 }
+      );
+    }
 
-    // Devolver una respuesta exitosa
+    if (account.total_balance > 0) {
+      return NextResponse.json(
+        { message: 'No se puede cerrar una cuenta con saldo positivo' },
+        { status: 400 }
+      );
+    }
+
+    await deleteAccount(iban, documentNumber);
+    
     return NextResponse.json({ message: 'Cuenta eliminada correctamente' });
+
   } catch (error) {
-    // Manejar errores y devolver una respuesta de error
-    return NextResponse.json({ message: error.message }, { status: 400 });
+    console.error('Error en el servidor:', error);
+    return NextResponse.json(
+      { message: 'Error al eliminar la cuenta' }, 
+      { status: 500 }
+    );
   }
 }
