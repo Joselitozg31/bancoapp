@@ -141,7 +141,7 @@ const DashboardPage = () => {
             {account.iban}
           </a>
         </td>
-        <td className="bg-transparent text-white rounded-lg">{account.total_balance} {getCurrencySymbol(account.currency)}</td>
+        <td className="bg-transparent text-white rounded-lg">{account.available_balance} {getCurrencySymbol(account.currency)}</td>
         <td className="bg-transparent text-white rounded-lg">{new Date(account.opening_date).toLocaleDateString()}</td>
         <td className="bg-transparent text-white rounded-lg">
           <button

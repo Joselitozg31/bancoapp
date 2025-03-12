@@ -85,7 +85,7 @@ export default function AccountsPage() {
                       {account.iban}
                     </a>
                   </td>
-                  <td className="p-2">{account.total_balance} {getCurrencySymbol(account.currency)}</td>
+                  <td className="p-2">{account.available_balance} {getCurrencySymbol(account.currency)}</td>
                   <td className="p-2">{new Date(account.opening_date).toLocaleDateString()}</td>
                   <td className="p-2">
                     <button

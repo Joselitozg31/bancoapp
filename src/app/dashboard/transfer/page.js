@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Header from '@/components/header';
 
 export default function TransferPage() {
   const [accounts, setAccounts] = useState([]);
@@ -11,6 +13,7 @@ export default function TransferPage() {
   const [amount, setAmount] = useState('');
   const [concept, setConcept] = useState('');
   const [error, setError] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     // Fetch user accounts
@@ -90,9 +93,10 @@ export default function TransferPage() {
   };
 
   return (
-    <div className="min-h-full flex items-center justify-center">
-      <div className="container max-w-3xl p-8">
-        <h1 className="text-3xl font-bold mb-6 text-white">Transferencia</h1>
+    <div className="min-h-full flex flex-col items-center justify-center bg-blue-900 pt-24">
+      <Header />
+      <div className="container max-w-3xl p-8 bg-white bg-opacity-75 rounded-lg shadow-lg mt-24">
+        <h1 className="text-3xl font-bold mb-6 text-center text-white">Transferencia</h1>
         {error && (
           <p className="error">{error}</p>
         )}
@@ -109,7 +113,7 @@ export default function TransferPage() {
               >
                 <option value="">Seleccione una cuenta</option>
                 {accounts.map(account => (
-                  <option key={account.iban} value={account.iban}>
+                  <option key={account.iban} value={account.iban} className="text-black">
                     {account.iban}
                   </option>
                 ))}
@@ -174,7 +178,7 @@ export default function TransferPage() {
               <button type="submit" className="bg-blue-700 text-white p-2 rounded-lg">
                 Enviar
               </button>
-              <button type="button" className="bg-blue-500 text-white p-2 rounded-lg" onClick={() => window.location.reload()}>
+              <button type="button" className="bg-blue-500 text-white p-2 rounded-lg" onClick={() => router.push('/dashboard')}>
                 Cancelar
               </button>
             </div>
