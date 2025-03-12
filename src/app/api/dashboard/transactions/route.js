@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/database';
+import { getTransactions } from '@/lib/transactions';
 
 export async function GET(request) {
   try {
@@ -10,12 +10,7 @@ export async function GET(request) {
     }
 
     // Obtener el historial de transacciones
-    const transactions = await query(
-      `SELECT * FROM transfers 
-       WHERE origin_account_iban IN (SELECT account_iban FROM user_accounts WHERE user_document_number = ?) 
-       OR destination_account_iban IN (SELECT account_iban FROM user_accounts WHERE user_document_number = ?)`,
-      [document_number, document_number]
-    );
+    const transactions = await getTransactions(document_number);
 
     return NextResponse.json(transactions);
   } catch (error) {
