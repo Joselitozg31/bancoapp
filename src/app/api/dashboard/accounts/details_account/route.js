@@ -1,25 +1,30 @@
 import { NextResponse } from 'next/server';
-import { getAccountDetails } from '@/lib/accounts'; // Asegúrate de tener esta función implementada
+import { query } from '@/lib/database';
 
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const iban = searchParams.get('iban');
-  const userDocumentNumber = request.headers.get('user_document_number');
-
-  if (!iban || !userDocumentNumber) {
-    return NextResponse.json({ message: 'IBAN or user document number is missing' }, { status: 400 });
-  }
-
   try {
-    const accountDetails = await getAccountDetails(iban, userDocumentNumber);
+    const { searchParams } = new URL(request.url);
+    const iban = searchParams.get('iban');
+    const document_number = request.headers.get('user_document_number');
 
-    if (!accountDetails) {
-      return NextResponse.json({ message: 'Account not found' }, { status: 404 });
+    if (!document_number) {
+      return NextResponse.json({ message: 'Usuario no autenticado' }, { status: 401 });
     }
 
-    return NextResponse.json(accountDetails);
+    // Obtener los detalles de la cuenta
+    const accountDetails = await query(
+      'SELECT * FROM accounts WHERE iban = ?',
+      [iban]
+    );
+
+    // Obtener el historial de transacciones de la cuenta
+    const transactions = await query(
+      'SELECT * FROM transfers WHERE origin_account_iban = ? OR destination_account_iban = ?',
+      [iban, iban]
+    );
+
+    return NextResponse.json({ accountDetails: accountDetails[0], transactions });
   } catch (error) {
-    console.error('Error fetching account details:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
