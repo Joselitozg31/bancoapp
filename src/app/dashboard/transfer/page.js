@@ -61,7 +61,7 @@ export default function TransferPage() {
         throw new Error('Usuario no autenticado');
       }
 
-      const response = await fetch('/api/transfer', {
+      const response = await fetch('/api/dashboard/transfer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ export default function TransferPage() {
                 <option value="">Seleccione una cuenta</option>
                 {accounts.map(account => (
                   <option key={account.iban} value={account.iban}>
-                    {account.iban} - {account.opening_date} - {account.account_type}
+                    {account.iban}
                   </option>
                 ))}
               </select>

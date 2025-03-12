@@ -1,14 +1,26 @@
-// filepath: d:\XAMPP\htdocs\DES\Servidor_2425\bancoapp\src\server.js
-const express = require('express');
-const app = express();
-const transferRoutes = require('./app/api/dashboard/transfer/route');
+// filepath: c:\xampp\htdocs\Desarrolo servidor\bancoapp\src\app\api\dashboard\transfer\route.js
+import { NextResponse } from 'next/server';
+import { transferFunds } from '@/lib/transfer'; 
 
-app.use(express.json());
+export async function POST(request) {
+  try {
+    const { originIban, destinationIban, amount, concept } = await request.json();
+    const document_number = request.headers.get('document_number');
 
-// Usar las rutas definidas en route.js
-app.use('/api', transferRoutes);
+    if (!document_number) {
+      return NextResponse.json({ message: 'Usuario no autenticado' }, { status: 401 });
+    }
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en el puerto ${PORT}`);
-});
+    // Lógica para realizar la transferencia
+    const result = await transferFunds({
+      originIban,
+      destinationIban,
+      amount,
+      concept
+    });
+
+    return NextResponse.json({ message: 'Transferencia realizada con éxito', result });
+  } catch (error) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}
