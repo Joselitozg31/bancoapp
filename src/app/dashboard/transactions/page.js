@@ -15,7 +15,7 @@ export default function TransactionsPage() {
           throw new Error('Usuario no autenticado');
         }
 
-        const response = await fetch('/api/dashboard/transactions', {
+        const response = await fetch('/api/dashboard/historial', {
           headers: {
             'Content-Type': 'application/json',
             'document_number': userData.document_number,
