@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getTransactions } from '@/lib/transactions';
+import { getTransactions } from '@/lib/historial';
 
 export async function GET(request) {
   try {
