@@ -77,7 +77,14 @@ export default function AccountsPage() {
             <tbody>
               {accounts.map(account => (
                 <tr key={account.iban} className="text-white bg-blue-900 bg-opacity-75">
-                  <td className="p-2">{account.iban}</td>
+                  <td className="p-2">
+                    <a
+                      onClick={() => router.push(`/dashboard/accounts/details_account?iban=${account.iban}`)}
+                      className="text-blue-500 hover:underline cursor-pointer"
+                    >
+                      {account.iban}
+                    </a>
+                  </td>
                   <td className="p-2">{account.total_balance} {getCurrencySymbol(account.currency)}</td>
                   <td className="p-2">{new Date(account.opening_date).toLocaleDateString()}</td>
                   <td className="p-2">

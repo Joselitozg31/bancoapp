@@ -141,3 +141,21 @@ export async function verifyAccountOwnership(iban, documentNumber) {
     throw new Error('Error al verificar la propiedad de la cuenta');
   }
 }
+
+// Ejemplo de implementación de la función getAccountDetails
+export async function getAccountDetails(iban, userDocumentNumber) {
+  // Implementa la lógica para obtener los detalles de la cuenta
+  // Esto puede incluir una consulta a la base de datos
+  // Aquí hay un ejemplo ficticio:
+  const accountDetails = {
+    iban: iban,
+    account_type: 'Cuenta Corriente',
+    currency: 'EUR',
+    total_balance: 1000,
+    available_balance: 800,
+    held_balance: 200,
+    opening_date: '2022-01-01',
+  };
+
+  return accountDetails;
+}

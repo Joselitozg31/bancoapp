@@ -14,10 +14,34 @@ export default function TransferPage() {
 
   useEffect(() => {
     // Fetch user accounts
-    fetch('/api/dashboard/list_accounts')
-      .then(response => response.json())
-      .then(data => setAccounts(data))
-      .catch(error => console.error('Error fetching accounts:', error));
+    const fetchAccounts = async () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem('user'));
+
+        if (!userData || !userData.document_number) {
+          throw new Error('Usuario no autenticado');
+        }
+
+        const response = await fetch('/api/dashboard/accounts/list_account', {
+          headers: {
+            'Content-Type': 'application/json',
+            'document_number': userData.document_number,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error fetching accounts');
+        }
+
+        const data = await response.json();
+        setAccounts(data);
+      } catch (error) {
+        console.error('Error fetching accounts:', error);
+        setError('Error al obtener las cuentas');
+      }
+    };
+
+    fetchAccounts();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -31,10 +55,17 @@ export default function TransferPage() {
     }
 
     try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+
+      if (!userData || !userData.document_number) {
+        throw new Error('Usuario no autenticado');
+      }
+
       const response = await fetch('/api/transfer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'document_number': userData.document_number,
         },
         body: JSON.stringify({
           originIban: selectedAccount,
@@ -74,7 +105,7 @@ export default function TransferPage() {
                 value={selectedAccount}
                 onChange={(e) => setSelectedAccount(e.target.value)}
                 required
-                className="w-full"
+                className="w-full text-white"
               >
                 <option value="">Seleccione una cuenta</option>
                 {accounts.map(account => (
