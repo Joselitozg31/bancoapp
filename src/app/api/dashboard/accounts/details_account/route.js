@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/database';
+import { getAccountDetailsByIban, getAccountTransactions } from '@/lib/accounts';
 
 export async function GET(request) {
   try {
@@ -12,18 +12,12 @@ export async function GET(request) {
     }
 
     // Obtener los detalles de la cuenta
-    const accountDetails = await query(
-      'SELECT * FROM accounts WHERE iban = ?',
-      [iban]
-    );
+    const accountDetails = await getAccountDetailsByIban(iban);
 
     // Obtener el historial de transacciones de la cuenta
-    const transactions = await query(
-      'SELECT * FROM transfers WHERE origin_account_iban = ? OR destination_account_iban = ?',
-      [iban, iban]
-    );
+    const transactions = await getAccountTransactions(iban);
 
-    return NextResponse.json({ accountDetails: accountDetails[0], transactions });
+    return NextResponse.json({ accountDetails, transactions });
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }

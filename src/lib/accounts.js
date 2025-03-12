@@ -159,3 +159,29 @@ export async function getAccountDetails(iban, userDocumentNumber) {
 
   return accountDetails;
 }
+
+export async function getAccountDetailsByIban(iban) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM accounts WHERE iban = ?',
+      [iban]
+    );
+    return rows[0];
+  } catch (error) {
+    console.error('Error al obtener detalles de la cuenta:', error);
+    throw new Error('Error al obtener detalles de la cuenta');
+  }
+}
+
+export async function getAccountTransactions(iban) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM transfers WHERE origin_account_iban = ? OR destination_account_iban = ?',
+      [iban, iban]
+    );
+    return rows;
+  } catch (error) {
+    console.error('Error al obtener transacciones de la cuenta:', error);
+    throw new Error('Error al obtener transacciones de la cuenta');
+  }
+}
