@@ -1,8 +1,10 @@
 import React from 'react';
+import Header from '@/components/header';
 
 const TerminosYCondiciones = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-950 to-blue-800 text-[var(--foreground)] bg-[var(--background)] font-emoji">
+      <Header />
       <div className="container max-h-[80vh] overflow-y-auto">
         <h1 className="text-3xl font-bold mb-6">Términos y Condiciones del Banco Innova</h1>
         <h2 className="text-2xl font-semibold mt-4 mb-2">1. Introducción</h2>

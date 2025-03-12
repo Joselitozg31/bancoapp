@@ -9,6 +9,19 @@ export default function AccountsPage() {
   const [error, setError] = useState(null);
   const router = useRouter();
 
+  const getCurrencySymbol = (currency) => {
+    switch (currency) {
+      case 'USD':
+        return '$';
+      case 'EUR':
+        return '€';
+      case 'GBP':
+        return '£';
+      default:
+        return currency;
+    }
+  };
+
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
@@ -65,7 +78,7 @@ export default function AccountsPage() {
               {accounts.map(account => (
                 <tr key={account.iban} className="text-white bg-blue-900 bg-opacity-75">
                   <td className="p-2">{account.iban}</td>
-                  <td className="p-2">{account.balance}€</td>
+                  <td className="p-2">{account.total_balance} {getCurrencySymbol(account.currency)}</td>
                   <td className="p-2">{new Date(account.opening_date).toLocaleDateString()}</td>
                   <td className="p-2">
                     <button

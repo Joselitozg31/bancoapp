@@ -73,13 +73,13 @@ export default function ContractAccountPage() {
             <select
               value={formData.account_type}
               onChange={(e) => setFormData({...formData, account_type: e.target.value})}
-              className="w-full p-2 rounded"
+              className="w-full p-2 rounded text-white [&>option]:bg-blue-900"
               required
             >
-              <option value="">Seleccione tipo de cuenta</option>
-              <option value="AHORRO">Cuenta de Ahorro</option>
-              <option value="CORRIENTE">Cuenta Corriente</option>
-              <option value="NOMINA">Cuenta Nómina</option>
+              <option value="" className="bg-blue-900">Seleccione tipo de cuenta</option>
+              <option value="AHORRO" className="bg-blue-900">Cuenta de Ahorro</option>
+              <option value="CORRIENTE" className="bg-blue-900">Cuenta Corriente</option>
+              <option value="NOMINA" className="bg-blue-900">Cuenta Nómina</option>
             </select>
           </div>
 
@@ -88,12 +88,12 @@ export default function ContractAccountPage() {
             <select
               value={formData.currency}
               onChange={(e) => setFormData({...formData, currency: e.target.value})}
-              className="w-full p-2 rounded"
+              className="w-full p-2 rounded text-white [&>option]:bg-blue-900"
               required
             >
-              <option value="EUR">Euro (EUR)</option>
-              <option value="USD">Dólar (USD)</option>
-              <option value="GBP">Libra (GBP)</option>
+              <option value="EUR" className="bg-blue-900">Euro (EUR)</option>
+              <option value="USD" className="bg-blue-900">Dólar (USD)</option>
+              <option value="GBP" className="bg-blue-900">Libra (GBP)</option>
             </select>
           </div>
 

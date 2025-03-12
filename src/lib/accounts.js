@@ -26,14 +26,12 @@ export async function contractAccount(accountData) {
   try {
     const {
       account_type,
-      currency,
+      currency, // Make sure this is being passed from the form
       user_document_number
     } = accountData;
 
-    // Generar IBAN aleatorio
     const iban = generateIBAN();
 
-    // Insertar la cuenta en la base de datos
     const [result] = await pool.query(
       `INSERT INTO accounts (
         iban, account_type, currency, total_balance, available_balance, held_balance, opening_date
@@ -41,11 +39,11 @@ export async function contractAccount(accountData) {
       [
         iban,
         account_type,
-        currency,
-        0, // balance inicial
-        0, // balance disponible inicial
-        0, // balance retenido inicial
-        new Date().toISOString().split('T')[0] // fecha actual
+        currency, // Make sure this value is being used here
+        0,
+        0,
+        0,
+        new Date().toISOString().split('T')[0]
       ]
     );
     if (result.affectedRows === 0) {

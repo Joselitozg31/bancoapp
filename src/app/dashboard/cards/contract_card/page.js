@@ -104,13 +104,13 @@ export default function ContractCardPage() {
             <select
               value={formData.card_type}
               onChange={(e) => setFormData({...formData, card_type: e.target.value})}
-              className="w-full p-2 rounded"
+              className="w-full p-2 rounded text-white [&>option]:bg-blue-900"
               required
             >
-              <option value="">Seleccione tipo de tarjeta</option>
-              <option value="DEBITO">Tarjeta de Débito</option>
-              <option value="CREDITO">Tarjeta de Crédito</option>
-              <option value="PREPAGO">Tarjeta Prepago</option>
+              <option value="" className="bg-blue-900">Seleccione tipo de tarjeta</option>
+              <option value="DEBITO" className="bg-blue-900">Tarjeta de Débito</option>
+              <option value="CREDITO" className="bg-blue-900">Tarjeta de Crédito</option>
+              <option value="PREPAGO" className="bg-blue-900">Tarjeta Prepago</option>
             </select>
           </div>
 
@@ -119,12 +119,12 @@ export default function ContractCardPage() {
             <select
               value={formData.account_iban}
               onChange={(e) => setFormData({...formData, account_iban: e.target.value})}
-              className="w-full p-2 rounded"
+              className="w-full p-2 rounded text-white [&>option]:bg-blue-900"
               required
             >
-              <option value="">Seleccione una cuenta</option>
+              <option value="" className="bg-blue-900">Seleccione una cuenta</option>
               {accounts.map(account => (
-                <option key={account.iban} value={account.iban}>
+                <option key={account.iban} value={account.iban} className="bg-blue-900">
                   {account.iban} - {account.account_type}
                 </option>
               ))}
