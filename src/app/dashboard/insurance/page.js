@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Header from '@/components/header';
 import CustomModal from '@/components/CustomModal';
 
 const InsurancePage = () => {
@@ -13,6 +14,8 @@ const InsurancePage = () => {
   const [contractedInsurances, setContractedInsurances] = useState([]);
   const [modalMessage, setModalMessage] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userAccounts, setUserAccounts] = useState([]);
+  const [selectedAccount, setSelectedAccount] = useState('');
 
   useEffect(() => {
     const fetchUserData = () => {
@@ -25,7 +28,7 @@ const InsurancePage = () => {
 
   useEffect(() => {
     const fetchContractedInsurances = async () => {
-      if (userData) {
+      if (userData && selectedAccount) {
         try {
           const response = await fetch('/api/insurance/contracted', {
             method: 'POST',
@@ -34,7 +37,7 @@ const InsurancePage = () => {
             },
             body: JSON.stringify({
               userDocumentNumber: userData.document_number,
-              accountIban: userData.account_iban,
+              accountIban: selectedAccount,
             }),
           });
 
@@ -51,6 +54,35 @@ const InsurancePage = () => {
     };
 
     fetchContractedInsurances();
+  }, [userData, selectedAccount]);
+
+  useEffect(() => {
+    const fetchUserAccounts = async () => {
+      if (userData) {
+        try {
+          const response = await fetch('/api/dashboard/accounts/list_account', {
+            method: 'GET',
+            headers: {
+              'document_number': userData.document_number,
+            },
+          });
+
+          const accounts = await response.json();
+          if (response.ok) {
+            setUserAccounts(accounts);
+            if (accounts.length > 0) {
+              setSelectedAccount(accounts[0].iban);
+            }
+          } else {
+            console.error('Error: ' + accounts.message);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      }
+    };
+
+    fetchUserAccounts();
   }, [userData]);
 
   const handleSelect = (insurance) => {
@@ -67,6 +99,12 @@ const InsurancePage = () => {
       return;
     }
 
+    if (!selectedAccount) {
+      setModalMessage('Error: Debes seleccionar una cuenta');
+      setIsModalOpen(true);
+      return;
+    }
+
     try {
       const response = await fetch('/api/insurance/contratar', {
         method: 'POST',
@@ -76,7 +114,7 @@ const InsurancePage = () => {
         body: JSON.stringify({
           selectedInsurances,
           userDocumentNumber: userData.document_number,
-          accountIban: userData.account_iban,
+          accountIban: selectedAccount,
         }),
       });
 
@@ -84,7 +122,7 @@ const InsurancePage = () => {
       if (response.ok) {
         setModalMessage('Seguros contratados');
         setIsModalOpen(true);
-        window.location.reload(); // Recargar la página
+        window.location.reload();
       } else {
         setModalMessage('Error: ' + result.message);
         setIsModalOpen(true);
@@ -103,6 +141,12 @@ const InsurancePage = () => {
       return;
     }
 
+    if (!selectedAccount) {
+      setModalMessage('Error: Debes seleccionar una cuenta');
+      setIsModalOpen(true);
+      return;
+    }
+
     try {
       const response = await fetch('/api/insurance/dar_de_baja', {
         method: 'POST',
@@ -112,7 +156,7 @@ const InsurancePage = () => {
         body: JSON.stringify({
           selectedInsurances,
           userDocumentNumber: userData.document_number,
-          accountIban: userData.account_iban,
+          accountIban: selectedAccount,
         }),
       });
 
@@ -120,7 +164,7 @@ const InsurancePage = () => {
       if (response.ok) {
         setModalMessage('Seguros dados de baja');
         setIsModalOpen(true);
-        window.location.reload(); // Recargar la página
+        window.location.reload();
       } else {
         setModalMessage('Error: ' + result.message);
         setIsModalOpen(true);
@@ -139,8 +183,43 @@ const InsurancePage = () => {
   const isAnyInsuranceSelected = Object.values(selectedInsurances).some(value => value);
 
   return (
+    <div className="min-h-full flex flex-col items-center justify-start bg-gradient-to-br from-blue-900 to-slate-900 text-white py-6">
+      <Header />
     <div className="container mx-auto p-4 mb-16 max-w-2xl">
       <h1 className="text-3xl font-bold mb-6 text-white">Contrata nuestros mejores seguros</h1>
+      
+      {userAccounts.length > 0 ? (
+        <div className="mb-6">
+          <label htmlFor="account-select" className="block text-sm font-medium mb-2">
+            Selecciona una cuenta:
+          </label>
+          <select
+            id="account-select"
+            value={selectedAccount}
+            onChange={(e) => setSelectedAccount(e.target.value)}
+            className="w-full p-2 rounded-md bg-slate-800 border border-gray-300 text-white"
+            style={{ color: 'white' }}
+          >
+            {userAccounts.map((account) => (
+              <option 
+                key={account.iban} 
+                value={account.iban}
+                className="bg-slate-800 text-white"
+                style={{ backgroundColor: '#1e293b', color: 'white' }}
+              >
+                {account.iban} - Saldo: {account.balance}€
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-md">
+          <p className="text-white">
+            Debes tener al menos una cuenta bancaria para contratar seguros.
+            Por favor, crea una cuenta primero.
+          </p>
+        </div>
+      )}
       <div className="space-y-4 mb-8">
         <div
           className={`p-4 rounded-lg shadow-md cursor-pointer ${selectedInsurances.medico ? 'bg-green-500 text-white border-green-700' : contractedInsurances.includes(1) ? 'bg-yellow-500 text-white border-yellow-700' : 'bg-white/10 border-gray-300 text-white'} border-2`}
@@ -188,6 +267,7 @@ const InsurancePage = () => {
         title="Mensaje"
         message={modalMessage}
       />
+    </div>
     </div>
   );
 };

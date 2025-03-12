@@ -36,6 +36,7 @@ export async function contractAccount(accountData) {
       `INSERT INTO accounts (
         iban, account_type, currency, total_balance, available_balance, held_balance, opening_date
       ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+
       [
         iban,
         account_type,
@@ -72,52 +73,72 @@ function generateIBAN() {
 }
 
 export async function deleteAccount(iban, documentNumber) {
+  const connection = await pool.getConnection();
   try {
-    // Primero verificamos si hay tarjetas asociadas
-    const [cards] = await pool.query(
-      'SELECT * FROM cards WHERE account_iban = ?',
+    await connection.beginTransaction();
+
+    // Verificar que la cuenta pertenece al usuario usando user_accounts
+    const [account] = await connection.query(
+      `SELECT accounts.* 
+       FROM accounts 
+       INNER JOIN user_accounts ON accounts.iban = user_accounts.account_iban 
+       WHERE accounts.iban = ? AND user_accounts.user_document_number = ?`,
+      [iban, documentNumber]
+    );
+
+    if (account.length === 0) {
+      throw new Error('La cuenta no existe o no pertenece al usuario');
+    }
+
+    // Eliminar seguros relacionados con la cuenta
+    await connection.query(
+      'DELETE FROM user_account_insurances WHERE account_iban = ?',
       [iban]
     );
 
-    if (cards && cards.length > 0) {
-      throw new Error('No se puede eliminar la cuenta porque tiene tarjetas asociadas');
-    }
+    // Eliminar transacciones relacionadas
+    await connection.query(
+      'DELETE FROM transactions WHERE account_iban = ?',
+      [iban]
+    );
 
-    // Comenzar transacción
-    await pool.query('START TRANSACTION');
+    // Eliminar transferencias relacionadas como origen
+    await connection.query(
+      'DELETE FROM transfers WHERE origin_account_iban = ?',
+      [iban]
+    );
 
-    try {
-      // Primero eliminar la relación en user_accounts
-      const [userAccountResult] = await pool.query(
-        'DELETE FROM user_accounts WHERE account_iban = ? AND user_document_number = ?',
-        [iban, documentNumber]
-      );
+    // Eliminar transferencias relacionadas como destino
+    await connection.query(
+      'DELETE FROM transfers WHERE destination_account_iban = ?',
+      [iban]
+    );
 
-      if (userAccountResult.affectedRows === 0) {
-        throw new Error('Error al eliminar la relación usuario-cuenta');
-      }
+    // Eliminar tarjetas asociadas a la cuenta
+    await connection.query(
+      'DELETE FROM cards WHERE account_iban = ?',
+      [iban]
+    );
 
-      // Después eliminar la cuenta
-      const [accountResult] = await pool.query(
-        'DELETE FROM accounts WHERE iban = ?',
-        [iban]
-      );
+    // Eliminar la relación usuario-cuenta
+    await connection.query(
+      'DELETE FROM user_accounts WHERE account_iban = ?',
+      [iban]
+    );
 
-      if (accountResult.affectedRows === 0) {
-        throw new Error('Error al eliminar la cuenta');
-      }
+    // Finalmente, eliminar la cuenta
+    await connection.query(
+      'DELETE FROM accounts WHERE iban = ?',
+      [iban]
+    );
 
-      // Confirmar transacción
-      await pool.query('COMMIT');
-      return true;
-    } catch (error) {
-      // Si hay error, revertir cambios
-      await pool.query('ROLLBACK');
-      throw error;
-    }
+    await connection.commit();
+    return true;
   } catch (error) {
-    console.error('Error al eliminar cuenta:', error);
-    throw new Error(error.message || 'Error al eliminar la cuenta');
+    await connection.rollback();
+    throw new Error('Error al eliminar la cuenta: ' + error.message);
+  } finally {
+    connection.release();
   }
 }
 
@@ -183,5 +204,148 @@ export async function getAccountTransactions(iban) {
   } catch (error) {
     console.error('Error al obtener transacciones de la cuenta:', error);
     throw new Error('Error al obtener transacciones de la cuenta');
+  }
+}
+
+export async function addMoney(iban, amount) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Primero obtener el user_document_number asociado a la cuenta
+    const [userAccount] = await connection.query(
+      'SELECT user_document_number FROM user_accounts WHERE account_iban = ?',
+      [iban]
+    );
+
+    if (userAccount.length === 0) {
+      throw new Error('Cuenta no encontrada');
+    }
+
+    // Actualizar el saldo de la cuenta
+    const [result] = await connection.query(
+      'UPDATE accounts SET available_balance = available_balance + ? WHERE iban = ?',
+      [amount, iban]
+    );
+
+    if (result.affectedRows === 0) {
+      throw new Error('Cuenta no encontrada');
+    }
+
+    // Registrar la transacción incluyendo el user_document_number
+    await connection.query(
+      'INSERT INTO transactions (account_iban, user_document_number, amount, concept, transaction_type, transaction_date) VALUES (?, ?, ?, ?, ?, NOW())',
+      [iban, userAccount[0].user_document_number, amount, 'Depósito de dinero', 'income']
+    );
+
+    await connection.commit();
+    return true;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function withdrawMoney(iban, amount) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Primero obtener el user_document_number asociado a la cuenta
+    const [userAccount] = await connection.query(
+      'SELECT user_document_number FROM user_accounts WHERE account_iban = ?',
+      [iban]
+    );
+
+    if (userAccount.length === 0) {
+      throw new Error('Cuenta no encontrada');
+    }
+
+    // Verificar saldo disponible
+    const [account] = await connection.query(
+      'SELECT available_balance FROM accounts WHERE iban = ?',
+      [iban]
+    );
+
+    if (account.length === 0) {
+      throw new Error('Cuenta no encontrada');
+    }
+
+    if (account[0].available_balance < amount) {
+      throw new Error('Saldo insuficiente');
+    }
+
+    // Actualizar el saldo de la cuenta
+    await connection.query(
+      'UPDATE accounts SET available_balance = available_balance - ? WHERE iban = ?',
+      [amount, iban]
+    );
+
+    // Registrar la transacción incluyendo el user_document_number
+    await connection.query(
+      'INSERT INTO transactions (account_iban, user_document_number, amount, concept, transaction_type, transaction_date) VALUES (?, ?, ?, ?, ?, NOW())',
+      [iban, userAccount[0].user_document_number, amount, 'Retiro de dinero', 'expense']
+    );
+
+    await connection.commit();
+    return true;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function holdMoney(iban, amount) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Primero obtener el user_document_number asociado a la cuenta
+    const [userAccount] = await connection.query(
+      'SELECT user_document_number FROM user_accounts WHERE account_iban = ?',
+      [iban]
+    );
+
+    if (userAccount.length === 0) {
+      throw new Error('Cuenta no encontrada');
+    }
+
+    // Verificar saldo disponible
+    const [account] = await connection.query(
+      'SELECT available_balance FROM accounts WHERE iban = ?',
+      [iban]
+    );
+
+    if (account.length === 0) {
+      throw new Error('Cuenta no encontrada');
+    }
+
+    if (account[0].available_balance < amount) {
+      throw new Error('Saldo insuficiente');
+    }
+
+    // Actualizar el saldo de la cuenta
+    await connection.query(
+      'UPDATE accounts SET available_balance = available_balance - ?, held_balance = held_balance + ? WHERE iban = ?',
+      [amount, amount, iban]
+    );
+
+    // Registrar la transacción incluyendo el user_document_number
+    await connection.query(
+      'INSERT INTO transactions (account_iban, user_document_number, amount, concept, transaction_type, transaction_date) VALUES (?, ?, ?, ?, ?, NOW())',
+      [iban, userAccount[0].user_document_number, amount, 'Retención de dinero', 'held']
+    );
+
+    await connection.commit();
+    return true;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
   }
 }

@@ -141,11 +141,11 @@ export default function AreaPersonal() {
               </div>
               <div className="grid grid-cols-2 gap-2 mb-6">
                 <div>
-                  <p className="text-xl font-bold"><strong>Email:</strong></p>
+                  <p className="text-xl font-bold"><strong>Correo electronico:</strong></p>
                   <p className="text-xl">{user.email}</p>
                 </div>
                 <div>
-                  <p className="text-xl font-bold"><strong>Phone:</strong></p>
+                  <p className="text-xl font-bold"><strong>Telefono:</strong></p>
                   <p className="text-xl">{user.phone}</p>
                 </div>
               </div>
@@ -204,15 +204,15 @@ export default function AreaPersonal() {
               <h2 className="text-xl font-bold mt-6">Datos Fiscales</h2>
               <div className="grid grid-cols-3 gap-2 mb-6">
                 <div>
-                  <p className="text-xl font-bold"><strong>Country:</strong></p>
+                  <p className="text-xl font-bold"><strong>Pais:</strong></p>
                   <p className="text-xl">{getCountryLabel(user.country)}</p>
                 </div>
                 <div>
-                  <p className="text-xl font-bold"><strong>Nationality:</strong></p>
+                  <p className="text-xl font-bold"><strong>Nacionalidad:</strong></p>
                   <p className="text-xl">{getNationalityLabel(user.nationality)}</p>
                 </div>
                 <div>
-                  <p className="text-xl font-bold"><strong>Address:</strong></p>
+                  <p className="text-xl font-bold"><strong>Direccion:</strong></p>
                   <p className="text-xl">{user.address}</p>
                 </div>
               </div>

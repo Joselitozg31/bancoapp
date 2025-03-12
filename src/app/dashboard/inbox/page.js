@@ -10,9 +10,52 @@ const InboxPage = () => {
   // Descargar mensaje en PDF
   const handleDownload = (message) => {
     const doc = new jsPDF();
-    doc.text(`Asunto: ${message.subject}`, 10, 10);
-    doc.text(`Mensaje: ${message.body}`, 10, 20);
-    doc.save(`${message.subject}.pdf`);
+    
+    // Configuración de estilos
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(0, 48, 135); // Color azul corporativo
+    
+    // Título
+    doc.text("Mensaje del Banco", 105, 20, { align: "center" });
+    
+    // Línea separadora
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(0, 48, 135);
+    doc.line(20, 25, 190, 25);
+    
+    // Detalles del mensaje
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text("Asunto:", 20, 40);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(message.subject, 20, 50);
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Mensaje:", 20, 70);
+    
+    // Contenido del mensaje con saltos de línea automáticos
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    const splitBody = doc.splitTextToSize(message.body, 170);
+    doc.text(splitBody, 20, 80);
+    
+    // Fecha y hora
+    const currentDate = new Date().toLocaleString('es-ES');
+    doc.setFontSize(10);
+    doc.setTextColor(128, 128, 128);
+    doc.text(`Descargado el: ${currentDate}`, 20, 280);
+    
+    // Pie de página
+    doc.setFont("helvetica", "italic");
+    doc.text("Este es un documento generado automáticamente por su banco.", 105, 290, { align: "center" });
+    
+    // Guardar el PDF
+    doc.save(`Mensaje_${message.subject.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
   };
 
   return (

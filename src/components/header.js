@@ -1,7 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 const Header = ({ userAccount }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -128,8 +127,8 @@ const Header = ({ userAccount }) => {
           </button>
           {userMenuOpen && (
             <div className="absolute right-0 top-full mt-2 w-48 bg-white text-black rounded-md shadow-lg z-10 menu-content">
-              <a href="/dashboard/area_personal" className="block px-4 py-2 hover:bg-gray-200">Área Personal</a>
-              <a href="/dashboard/inbox" className="block px-4 py-2 hover:bg-gray-200">Inbox</a>
+              <a href="/dashboard/area_personal" className="block px-4 py-2 hover:bg-gray-200">Area Personal</a>
+              <a href="/dashboard/inbox" className="block px-4 py-2 hover:bg-gray-200">Bandeja de entrada</a>
               <button 
                 onClick={handleLogout}
                 className="w-full text-left px-4 py-2 hover:bg-gray-200 text-red-600 bg-white"
