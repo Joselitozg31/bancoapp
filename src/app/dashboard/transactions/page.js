@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import Header from '@/components/header';
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
@@ -38,37 +39,40 @@ export default function TransactionsPage() {
   }, []);
 
   return (
-    <div className="min-h-full flex items-center justify-center">
-      <div className="container max-w-3xl p-8">
-        <h1 className="text-3xl font-bold mb-6 text-white">Historial de Transacciones</h1>
-        {error && (
-          <p className="error text-white">{error}</p>
-        )}
-        <table className="min-w-full">
-          <thead>
-            <tr>
-              <th className="py-2 text-white">ID</th>
-              <th className="py-2 text-white">Cuenta Origen</th>
-              <th className="py-2 text-white">Cuenta Destino</th>
-              <th className="py-2 text-white">Importe</th>
-              <th className="py-2 text-white">Fecha</th>
-              <th className="py-2 text-white">Concepto</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map(transaction => (
-              <tr key={transaction.transfer_id}>
-                <td className="py-2 text-white">{transaction.transfer_id}</td>
-                <td className="py-2 text-white">{transaction.origin_account_iban}</td>
-                <td className="py-2 text-white">{transaction.destination_account_iban}</td>
-                <td className="py-2 text-white">{transaction.amount}</td>
-                <td className="py-2 text-white">{new Date(transaction.transfer_date).toLocaleString()}</td>
-                <td className="py-2 text-white">{transaction.concept}</td>
+    <>
+      <Header />
+      <div className="min-h-full flex items-center justify-center">
+        <div className="container max-w-3xl p-8">
+          <h1 className="text-3xl font-bold mb-6 text-white">Historial de Transacciones</h1>
+          {error && (
+            <p className="error text-white">{error}</p>
+          )}
+          <table className="min-w-full">
+            <thead>
+              <tr>
+                <th className="py-2 text-white">ID</th>
+                <th className="py-2 text-white">Cuenta Origen</th>
+                <th className="py-2 text-white">Cuenta Destino</th>
+                <th className="py-2 text-white">Importe</th>
+                <th className="py-2 text-white">Fecha</th>
+                <th className="py-2 text-white">Concepto</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {transactions.map(transaction => (
+                <tr key={transaction.transfer_id}>
+                  <td className="py-2 text-white">{transaction.transfer_id}</td>
+                  <td className="py-2 text-white">{transaction.origin_account_iban}</td>
+                  <td className="py-2 text-white">{transaction.destination_account_iban}</td>
+                  <td className="py-2 text-white">{transaction.amount}</td>
+                  <td className="py-2 text-white">{new Date(transaction.transfer_date).toLocaleString()}</td>
+                  <td className="py-2 text-white">{transaction.concept}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
