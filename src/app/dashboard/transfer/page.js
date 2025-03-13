@@ -5,18 +5,27 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
 
 export default function TransferPage() {
-  const [accounts, setAccounts] = useState([]);
-  const [selectedAccount, setSelectedAccount] = useState('');
-  const [destinationIban, setDestinationIban] = useState('');
-  const [destinationName, setDestinationName] = useState('');
-  const [destinationLastName, setDestinationLastName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [concept, setConcept] = useState('');
-  const [error, setError] = useState('');
-  const router = useRouter();
-
+  // Estado para almacenar las cuentas del usuario
+  const [accounts, setAccounts] = useState([]); 
+  // Estado para almacenar la cuenta seleccionada
+  const [selectedAccount, setSelectedAccount] = useState(''); 
+  // Estado para almacenar el IBAN de destino
+  const [destinationIban, setDestinationIban] = useState(''); 
+  // Estado para almacenar el nombre del destinatario
+  const [destinationName, setDestinationName] = useState(''); 
+  // Estado para almacenar el apellido del destinatario
+  const [destinationLastName, setDestinationLastName] = useState(''); 
+  // Estado para almacenar el importe de la transferencia
+  const [amount, setAmount] = useState(''); 
+  // Estado para almacenar el concepto de la transferencia
+  const [concept, setConcept] = useState(''); 
+  // Estado para almacenar mensajes de error
+  const [error, setError] = useState(''); 
+  // Hook para la navegación
+  const router = useRouter(); 
+  
   useEffect(() => {
-    // Fetch user accounts
+    // Función para obtener las cuentas del usuario
     const fetchAccounts = async () => {
       try {
         const userData = JSON.parse(localStorage.getItem('user'));

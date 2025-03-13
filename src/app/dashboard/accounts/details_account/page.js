@@ -4,16 +4,23 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 const Page = () => {
+  // Estado para almacenar los detalles de la cuenta seleccionada
   const [selectedAccount, setSelectedAccount] = useState(null);
+  // Estado para almacenar las transacciones de la cuenta
   const [transactions, setTransactions] = useState([]);
+  // Estado para manejar el estado de carga
   const [loading, setLoading] = useState(true);
+  // Estado para manejar errores
   const [error, setError] = useState(null);
+  // Obtener los parámetros de búsqueda de la URL
   const searchParams = useSearchParams();
   const iban = searchParams.get('iban');
 
   useEffect(() => {
+    // Función para obtener los detalles de la cuenta
     const fetchAccountDetails = async () => {
       try {
+        // Obtener el usuario del localStorage
         const user = JSON.parse(localStorage.getItem('user'));
         if (!user || !user.document_number) {
           throw new Error('User document number is missing');
@@ -21,6 +28,7 @@ const Page = () => {
 
         console.log('Fetching account details for IBAN:', iban);
 
+        // Realizar la solicitud para obtener los detalles de la cuenta
         const response = await fetch(`/api/dashboard/accounts/details_account?iban=${iban}`, {
           headers: {
             'user_document_number': user.document_number
@@ -35,6 +43,7 @@ const Page = () => {
         const data = await response.json();
         console.log('Account details fetched:', data);
 
+        // Actualizar el estado con los detalles de la cuenta y las transacciones
         setSelectedAccount(data.accountDetails);
         setTransactions(data.transactions);
       } catch (err) {
@@ -45,12 +54,15 @@ const Page = () => {
       }
     };
 
+    // Llamar a la función para obtener los detalles de la cuenta si el IBAN está presente
     if (iban) {
       fetchAccountDetails();
     }
   }, [iban]);
 
+  // Mostrar un mensaje de carga mientras se obtienen los datos
   if (loading) return <p>Loading...</p>;
+  // Mostrar un mensaje de error si ocurre un error al obtener los datos
   if (error) return <p>Error loading account details: {error.message}</p>;
 
   return (

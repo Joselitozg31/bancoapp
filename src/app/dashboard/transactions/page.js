@@ -4,18 +4,24 @@ import React, { useEffect, useState } from 'react';
 import Header from '@/components/header';
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState([]);
-  const [error, setError] = useState('');
+  // Estado para almacenar las transacciones
+  const [transactions, setTransactions] = useState([]); 
+  // Estado para almacenar mensajes de error
+  const [error, setError] = useState(''); 
 
   useEffect(() => {
+    // Función para obtener el historial de transacciones
     const fetchTransactions = async () => {
       try {
+        // Obtener los datos del usuario desde localStorage
         const userData = JSON.parse(localStorage.getItem('user'));
 
+        // Verificar si el número de documento del usuario está presente
         if (!userData || !userData.document_number) {
           throw new Error('Usuario no autenticado');
         }
 
+        // Realizar la solicitud para obtener el historial de transacciones
         const response = await fetch('/api/dashboard/historial', {
           headers: {
             'Content-Type': 'application/json',
@@ -23,15 +29,18 @@ export default function TransactionsPage() {
           },
         });
 
+        // Verificar si la respuesta es exitosa
         if (!response.ok) {
           throw new Error('Error fetching transactions');
         }
 
+        // Obtener los datos de la respuesta
         const data = await response.json();
-        setTransactions(data);
+        setTransactions(data); // Actualizar el estado con las transacciones
       } catch (error) {
         console.error('Error fetching transactions:', error);
-        setError('Error al obtener el historial de transacciones');
+        // Actualizar el estado con el mensaje de error
+        setError('Error al obtener el historial de transacciones'); 
       }
     };
 
@@ -45,7 +54,8 @@ export default function TransactionsPage() {
         <div className="container max-w-3xl p-8">
           <h1 className="text-3xl font-bold mb-6 text-white">Historial de Transacciones</h1>
           {error && (
-            <p className="error text-white">{error}</p>
+            // Mostrar mensaje de error si existe
+            <p className="error text-white">{error}</p> 
           )}
           <table className="min-w-full">
             <thead>

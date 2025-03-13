@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Header from '@/components/header';
 
+// Lista de países disponibles
 const countries = [
   { value: 'ES', label: 'España' },
   { value: 'MX', label: 'México' },
@@ -10,6 +11,7 @@ const countries = [
   { value: 'US', label: 'Estados Unidos' },
 ];
 
+// Lista de nacionalidades disponibles
 const nationalities = [
   { value: 'ES', label: 'Española' },
   { value: 'MX', label: 'Mexicana' },
@@ -19,19 +21,22 @@ const nationalities = [
 ];
 
 export default function AreaPersonal() {
-  const [user, setUser] = useState(null); // Estado para almacenar los datos del usuario
-  const [error, setError] = useState(null); // Estado para almacenar mensajes de error
+  // Estado para almacenar los datos del usuario
+  const [user, setUser] = useState(null); 
+  // Estado para almacenar mensajes de error
+  const [error, setError] = useState(null); 
   const [formData, setFormData] = useState({
     currentPassword: '',
     password: '',
     confirmPassword: '',
-    document_number: '' // Inicialmente vacío
+    document_number: ''  
   });
 
   useEffect(() => {
     // Obtener los datos del usuario desde localStorage después de que el componente se haya montado
     const userData = JSON.parse(localStorage.getItem('user'));
-    console.log('User data from localStorage:', userData); // Log para verificar los datos del usuario
+    // Log para verificar los datos del usuario
+    console.log('User data from localStorage:', userData); 
 
     if (userData && userData.document_number) {
       setFormData((prevFormData) => ({
@@ -46,7 +51,8 @@ export default function AreaPersonal() {
             throw new Error('Error fetching user');
           }
           const data = await response.json();
-          console.log('User data:', data); // Log para verificar los datos del usuario
+          // Log para verificar los datos del usuario
+          console.log('User data:', data); 
           setUser(data);
         } catch (error) {
           setError(error.message);
@@ -59,7 +65,8 @@ export default function AreaPersonal() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value }); // Actualizar el estado del formulario
+    // Actualizar el estado del formulario con los datos ingresados por el usuario
+    setFormData({ ...formData, [name]: value }); 
   };
 
   const handleSubmit = async (e) => {
@@ -68,8 +75,8 @@ export default function AreaPersonal() {
       setError('Las contraseñas no coinciden');
       return;
     }
-
-    console.log('Submitting data:', { currentPassword: formData.currentPassword, password: formData.password, document_number: formData.document_number }); // Log para verificar los datos enviados
+    // Log para verificar los datos enviados
+    console.log('Submitting data:', { currentPassword: formData.currentPassword, password: formData.password, document_number: formData.document_number }); 
 
     try {
       const response = await fetch('/api/dashboard/update_password', {
@@ -82,7 +89,8 @@ export default function AreaPersonal() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message); // Lanzar un error si la respuesta no es exitosa
+        // Lanzar un error si la respuesta no es exitosa
+        throw new Error(errorData.message); 
       }
 
       setError(null);
@@ -93,7 +101,8 @@ export default function AreaPersonal() {
   };
 
   if (error) {
-    return <div>Error: {error}</div>; // Mostrar mensaje de error si existe
+     // Mostrar mensaje de error si existe un error al obtener los datos del usuario
+    return <div>Error: {error}</div>;
   }
 
   const formatDate = (dateString) => {
